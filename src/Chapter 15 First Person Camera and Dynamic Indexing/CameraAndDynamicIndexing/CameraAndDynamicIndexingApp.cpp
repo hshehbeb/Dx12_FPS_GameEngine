@@ -8,6 +8,7 @@
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
+#include "Core/UIObject.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -66,6 +67,7 @@ public:
 private:
     virtual void OnResize()override;
     virtual void Update(const GameTimer& gt)override;
+    void Draw3dObjects();
     virtual void Draw(const GameTimer& gt)override;
 
     virtual void OnMouseDown(WPARAM btnState, int x, int y)override;
@@ -121,6 +123,8 @@ private:
 
 	Camera mCamera;
 
+    std::unique_ptr<UIObject> mUIObj = nullptr;
+
     POINT mLastMousePos;
 };
 
@@ -171,6 +175,11 @@ bool CameraAndDynamicIndexingApp::Initialize()
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	mCamera.SetPosition(0.0f, 2.0f, -15.0f);
+
+    
+    mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
+    mUIObj->Initialize(*md3dDevice.Get(), *mCommandList.Get());
+    
  
 	LoadTextures();
     BuildRootSignature();
@@ -204,6 +213,10 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
 
+
+    mUIObj->Update();
+    
+
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
     mCurrFrameResource = mFrameResources[mCurrFrameResourceIndex].get();
@@ -222,6 +235,30 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 	UpdateObjectCBs(gt);
 	UpdateMaterialBuffer(gt);
 	UpdateMainPassCB(gt);
+}
+
+void CameraAndDynamicIndexingApp::Draw3dObjects()
+{
+    ID3D12DescriptorHeap* descriptorHeaps[] = { mSrvDescriptorHeap.Get() };
+    mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+    mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+
+    auto passCB = mCurrFrameResource->PassCB->Resource();
+    mCommandList->SetGraphicsRootConstantBufferView(1, passCB->GetGPUVirtualAddress());
+
+    // Bind all the materials used in this scene.  For structured buffers, we can bypass the heap and 
+    // set as a root descriptor.
+    auto matBuffer = mCurrFrameResource->MaterialBuffer->Resource();
+    mCommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
+
+    // Bind all the textures used in this scene.  Observe
+    // that we only have to specify the first descriptor in the table.  
+    // The root signature knows how many descriptors are expected in the table.
+    mCommandList->SetGraphicsRootDescriptorTable(3, mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+    mCommandList->SetPipelineState(mPSOs["opaque"].Get());
+    DrawRenderItems(mCommandList.Get(), mOpaqueRitems);
 }
 
 void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
@@ -249,26 +286,11 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
 
     // Specify the buffers we are going to render to.
     mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
-
-	ID3D12DescriptorHeap* descriptorHeaps[] = { mSrvDescriptorHeap.Get() };
-	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
-
-	auto passCB = mCurrFrameResource->PassCB->Resource();
-	mCommandList->SetGraphicsRootConstantBufferView(1, passCB->GetGPUVirtualAddress());
-
-	// Bind all the materials used in this scene.  For structured buffers, we can bypass the heap and 
-	// set as a root descriptor.
-	auto matBuffer = mCurrFrameResource->MaterialBuffer->Resource();
-	mCommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
-
-	// Bind all the textures used in this scene.  Observe
-    // that we only have to specify the first descriptor in the table.  
-    // The root signature knows how many descriptors are expected in the table.
-	mCommandList->SetGraphicsRootDescriptorTable(3, mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-    DrawRenderItems(mCommandList.Get(), mOpaqueRitems);
+    
+	Draw3dObjects();
+    
+    mCommandList->SetPipelineState(mPSOs["ui"].Get());
+    mUIObj->Draw(mCommandList);
 
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -708,11 +730,9 @@ void CameraAndDynamicIndexingApp::BuildShapeGeometry()
 
 void CameraAndDynamicIndexingApp::BuildPSOs()
 {
+	// PSO for opaque objects.
     D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
 
-	//
-	// PSO for opaque objects.
-	//
     ZeroMemory(&opaquePsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	opaquePsoDesc.InputLayout = { mInputLayout.data(), (UINT)mInputLayout.size() };
 	opaquePsoDesc.pRootSignature = mRootSignature.Get();
@@ -737,6 +757,41 @@ void CameraAndDynamicIndexingApp::BuildPSOs()
 	opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = mDepthStencilFormat;
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
+
+    
+    // PSO for ui objects.
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+    
+    ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+    psoDesc.InputLayout =
+    {
+        mUIObj->GetInputLayout().data(),
+        static_cast<UINT>(mUIObj->GetInputLayout().size())
+    };
+    psoDesc.pRootSignature = mUIObj->GetRootSignature().Get();
+    psoDesc.VS = 
+    {
+        reinterpret_cast<BYTE*>(mUIObj->GetVertexShaderCode()->GetBufferPointer()), 
+        mUIObj->GetVertexShaderCode()->GetBufferSize() 
+    };
+    psoDesc.PS = 
+    { 
+        reinterpret_cast<BYTE*>(mUIObj->GetPixelShaderCode()->GetBufferPointer()), 
+        mUIObj->GetPixelShaderCode()->GetBufferSize() 
+    };
+    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    psoDesc.SampleMask = UINT_MAX;
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    psoDesc.NumRenderTargets = 1;
+    psoDesc.RTVFormats[0] = mBackBufferFormat;
+    psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
+    psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
+    psoDesc.DSVFormat = mDepthStencilFormat;
+    
+    auto ret = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSOs["ui"]));
+    ThrowIfFailed(ret);
 }
 
 void CameraAndDynamicIndexingApp::BuildFrameResources()
