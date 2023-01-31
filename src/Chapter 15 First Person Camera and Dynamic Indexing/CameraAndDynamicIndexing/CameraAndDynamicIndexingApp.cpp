@@ -8,6 +8,7 @@
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
+#include "Core/Player.h"
 #include "Core/UIObject.h"
 
 using Microsoft::WRL::ComPtr;
@@ -121,6 +122,8 @@ private:
 
     PassConstants mMainPassCB;
 
+    std::unique_ptr<Player> mPlayer = nullptr;
+    
 	Camera mCamera;
 
     std::unique_ptr<UIObject> mUIObj = nullptr;
@@ -174,7 +177,8 @@ bool CameraAndDynamicIndexingApp::Initialize()
 	// so we have to query this information.
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	mCamera.SetPosition(0.0f, 2.0f, -15.0f);
+	mCamera.SetPosition(0.0f, 2.0f, -10.0f);
+    mPlayer = std::make_unique<Player>(mCamera);
 
     
     mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
@@ -350,16 +354,16 @@ void CameraAndDynamicIndexingApp::OnKeyboardInput(const GameTimer& gt)
 	const float dt = gt.DeltaTime();
 
 	if(GetAsyncKeyState('W') & 0x8000)
-		mCamera.Walk(10.0f*dt);
+	    mPlayer->MoveFwd();
 
 	if(GetAsyncKeyState('S') & 0x8000)
-		mCamera.Walk(-10.0f*dt);
+	    mPlayer->MoveBwd();
 
 	if(GetAsyncKeyState('A') & 0x8000)
-		mCamera.Strafe(-10.0f*dt);
+	    mPlayer->MoveLwd();
 
 	if(GetAsyncKeyState('D') & 0x8000)
-		mCamera.Strafe(10.0f*dt);
+	    mPlayer->MoveRwd();
 
 	mCamera.UpdateViewMatrix();
 }
