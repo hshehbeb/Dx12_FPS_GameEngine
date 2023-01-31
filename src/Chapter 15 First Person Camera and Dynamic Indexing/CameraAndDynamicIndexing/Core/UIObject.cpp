@@ -1,7 +1,7 @@
 ﻿#include <D3Dcompiler.h>
 
 #include "UIObject.h"
-
+#include "../../../Common/DDSTextureLoader.h"
 #include "../../../Common/d3dApp.h"
 #include "../../../Common/d3dUtil.h"
 #include "../DataStructures/Vertex.h"
@@ -47,12 +47,21 @@ DirectX::XMFLOAT4X4 UIObject::CalculateMVPMatrix() const
 
 void UIObject::LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
+    // mTexture = std::make_unique<Texture>();
+    // mTexture->Name = "uiTex";
+    // mTexture->Filename = L"../../Textures/grass.dds";
+    //
+    // ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(device,
+    //     cmdList, mTexture->Filename.c_str(),
+    //     mTexture->Resource, mTexture->UploadHeap)
+    // );
+
     mTexture = std::make_unique<Texture>();
     mTexture->Name = "uiTex";
-    mTexture->Filename = L"../../Textures/WoodCrate01.dds";
+    mTexture->Filename = L"../../Textures/uncompressed.dds";
     
-    ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(device,
-        cmdList, mTexture->Filename.c_str(),
+    ThrowIfFailed(::GenerateFontAssets(
+        device, cmdList, mTexture->Filename.c_str(),
         mTexture->Resource, mTexture->UploadHeap)
     );
 }

@@ -17,7 +17,14 @@
 // http://go.microsoft.com/fwlink/?LinkId=248926
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
+#include <algorithm>
+#include <memory>
+#include <wrl.h>
 
+#include <fstream>
+#include "stdio.h"
+#include "stdlib.h"
+#include "conio.h"
 #include <assert.h>
 #include <algorithm>
 #include <memory>
@@ -2132,6 +2139,106 @@ HRESULT DirectX::CreateDDSTextureFromFile( ID3D11Device* d3dDevice,
     return CreateDDSTextureFromFileEx( d3dDevice, nullptr, fileName, maxsize,
                                        D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false,
                                        texture, textureView, alphaMode );
+}
+
+void ReadNextCharacter(DDS_HEADER* header, _Out_ uint8_t* bitData)
+{
+    using namespace std;
+    
+    char HzkC[1000];
+    ifstream in("MyStr.txt");
+    if (!in.is_open())
+        exit(1);
+    
+    in.get(HzkC,1000);
+    
+    static int next = 0;
+    
+    char buffer2[128];
+    char* a = HzkC + next;
+    next += 2;
+    unsigned char qh, wh;
+    unsigned long offset;
+    FILE* HZK;
+
+    if (fopen_s(&HZK, "hzk32", "rb")) {
+        printf("Can't open haz16, Please add it?");
+        _getch();
+        exit(0);
+    }
+    
+    qh = *(a)-0xa0;
+    wh = *(a + 1) - 0xa0;
+    offset = (94 * (qh - 1) + (wh - 1)) * 128L;
+    fseek(HZK, offset, SEEK_SET);
+    fread(buffer2, 128, 1, HZK);
+
+    for (int i = 0; i < 32; i++)
+    {
+        for (int j = 0; j < 4; j++)
+            for (int k = 0; k < 8; k++)
+                if (buffer2[i * 4 + j] & (0x80 >> k))
+                {
+                    int m_row_size = 4ul * ((4 * header->width + 4ul - 1ul) / 4ul);
+                    int index = i * m_row_size + (j * 8 + k) * 4;
+                    *(bitData + index) = 255;
+                    *(bitData + index + 1) = 255;
+                    *(bitData + index + 2) = 255;
+                    *(bitData + index + 3) = 255;
+                }
+    }
+}
+
+HRESULT GenerateFontAssets(
+    _In_ ID3D12Device* device,                      
+    _In_ ID3D12GraphicsCommandList* cmdList,        
+    _In_z_ const wchar_t* szFileName,               
+    _Out_ ComPtr<ID3D12Resource>& texture,          
+    _Out_ ComPtr<ID3D12Resource>& textureUploadHeap,
+_In_ size_t maxsize,
+    _Out_opt_ DDS_ALPHA_MODE* alphaMode)
+{
+    if (texture)
+    {
+        texture = nullptr;
+    }
+    if (textureUploadHeap)
+    {
+        textureUploadHeap = nullptr;
+    }
+    if (alphaMode)
+    {
+        *alphaMode = DDS_ALPHA_MODE_UNKNOWN;
+    }
+
+    if (!device || !szFileName)
+    {
+        return E_INVALIDARG;
+    }
+
+    DDS_HEADER* header = nullptr;
+    uint8_t* bitData = nullptr;
+    size_t bitSize = 0;
+
+    std::unique_ptr<uint8_t[]> ddsData;
+    HRESULT hr = LoadTextureDataFromFile(szFileName, ddsData, &header, &bitData, &bitSize);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+    
+    ReadNextCharacter(header, bitData);
+    
+    hr = CreateTextureFromDDS12(device, cmdList, header,
+        bitData, bitSize, maxsize, false, texture, textureUploadHeap);
+
+    if (SUCCEEDED(hr))
+    {
+        if (alphaMode)
+            *alphaMode = GetAlphaMode(header);
+    }
+
+    return hr;
 }
 
 HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
