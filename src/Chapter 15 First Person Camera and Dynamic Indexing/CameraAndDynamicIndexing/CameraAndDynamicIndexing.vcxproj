@@ -153,6 +153,7 @@
     <ClCompile Include="Core\Player.cpp" />
     <ClCompile Include="Core\UIObject.cpp" />
     <ClCompile Include="FrameResource.cpp" />
+    <ClCompile Include="UIObjectsCollection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Common\Camera.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="DataStructures\Vertex.h" />
     <ClInclude Include="DataStructures\WorldSpacePoint.h" />
     <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="UIObjectsCollection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

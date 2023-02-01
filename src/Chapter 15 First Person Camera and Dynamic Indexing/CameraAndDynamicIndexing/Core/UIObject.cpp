@@ -18,10 +18,8 @@ UIObject::UIObject(ScreenSpacePoint position, int width, int height)
 void UIObject::Initialize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
 {
     LoadTexture(&device, &cmdList);
-    BuildRootSignature(device);
     BuildDescriptorHeap(device);
     BuildConstantBuffer(device);
-    BuildShaderLayout();
     BuildQuadGeometry(device, cmdList);
 }
 
@@ -47,6 +45,9 @@ DirectX::XMFLOAT4X4 UIObject::CalculateMVPMatrix() const
 
 void UIObject::LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
+    // load ready-to-use textures 
+    // == begin ==
+    //
     // mTexture = std::make_unique<Texture>();
     // mTexture->Name = "uiTex";
     // mTexture->Filename = L"../../Textures/grass.dds";
@@ -55,6 +56,8 @@ void UIObject::LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* cmdL
     //     cmdList, mTexture->Filename.c_str(),
     //     mTexture->Resource, mTexture->UploadHeap)
     // );
+    //
+    // == end ==
 
     mTexture = std::make_unique<Texture>();
     mTexture->Name = "uiTex";
@@ -120,76 +123,8 @@ void UIObject::BuildConstantBuffer(ID3D12Device& device)
         mCbvHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
-void UIObject::BuildRootSignature(ID3D12Device& device)
-{
-    CD3DX12_ROOT_PARAMETER slotRootParameter[2];
-    
-    // Create a single descriptor table of CBVs.
-    // CD3DX12_DESCRIPTOR_RANGE cbvTable;
-    // cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-    slotRootParameter[0].InitAsConstantBufferView(0);
-    
-    CD3DX12_DESCRIPTOR_RANGE texTable;
-    texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-    slotRootParameter[1].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
-    
-    auto staticSamplers = GetStaticSamplers();
-    
-    // A root signature is an array of root parameters.
-    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(2, slotRootParameter,
-        staticSamplers.size(), staticSamplers.data(),
-        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
-        );
-
-    // create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
-    Microsoft::WRL::ComPtr<ID3DBlob> serializedRootSig = nullptr;
-    Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
-    HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1,
-                                             serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf());
-
-    if (errorBlob != nullptr)
-    {
-        ::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-    }
-    ThrowIfFailed(hr);
-
-    ThrowIfFailed(device.CreateRootSignature(
-        0,
-        serializedRootSig->GetBufferPointer(),
-        serializedRootSig->GetBufferSize(),
-        IID_PPV_ARGS(&mRootSignature)));
-}
-
-void UIObject::BuildShaderLayout()
-{
-    const D3D_SHADER_MACRO alphaTestDefines[] =
-    {
-        "ALPHA_TEST", "1",
-        NULL, NULL
-    };
-
-    mVSByteCode = d3dUtil::CompileShader(L"Shaders\\vet_renderer2d.hlsl", nullptr, "main", "vs_5_0");
-    mPSByteCode = d3dUtil::CompileShader(L"Shaders\\pxl_renderer2d.hlsl", nullptr, "main", "ps_5_0");
-
-    mInputLayout =
-    {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-        {"UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-    };
-}
-
 void UIObject::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
 {
-    // const UINT mbByteSize = sizeof mWVPMatrix;
-    //
-    // ThrowIfFailed(D3DCreateBlob(mbByteSize, &mWVPMatBufferCPU));
-    // CopyMemory(mWVPMatBufferCPU->GetBufferPointer(), &mWVPMatrix, mbByteSize);
-    //
-    // mWVPMatBufferGPU = d3dUtil::CreateDefaultBuffer(&device, &cmdList, &mWVPMatrix,
-    //     mbByteSize, mWVPMatBufferUploader);
-
-
     DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(DirectX::Colors::White);
     std::array<Vertex, 4> vertices =
     {
@@ -238,69 +173,11 @@ void UIObject::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList
     mQuadGeom->DrawArgs["quad"] = submesh;
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> UIObject::GetStaticSamplers()
-{
-    	// Applications usually only need a handful of samplers.  So just define them all up front
-	// and keep them available as part of the root signature.  
-
-	const CD3DX12_STATIC_SAMPLER_DESC pointWrap(
-		0, // shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_POINT, // filter
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP); // addressW
-
-	const CD3DX12_STATIC_SAMPLER_DESC pointClamp(
-		1, // shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_POINT, // filter
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP); // addressW
-
-	const CD3DX12_STATIC_SAMPLER_DESC linearWrap(
-		2, // shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP); // addressW
-
-	const CD3DX12_STATIC_SAMPLER_DESC linearClamp(
-		3, // shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP); // addressW
-
-	const CD3DX12_STATIC_SAMPLER_DESC anisotropicWrap(
-		4, // shaderRegister
-		D3D12_FILTER_ANISOTROPIC, // filter
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressW
-		0.0f,                             // mipLODBias
-		8);                               // maxAnisotropy
-
-	const CD3DX12_STATIC_SAMPLER_DESC anisotropicClamp(
-		5, // shaderRegister
-		D3D12_FILTER_ANISOTROPIC, // filter
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressW
-		0.0f,                              // mipLODBias
-		8);                                // maxAnisotropy
-
-	return { 
-		pointWrap, pointClamp,
-		linearWrap, linearClamp, 
-		anisotropicWrap, anisotropicClamp };
-}
-
 void UIObject::Draw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList)
 {
     ID3D12DescriptorHeap* descriptorHeaps[] = {mSrvDescriptorHeap.Get()};
     cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-    cmdList->SetGraphicsRootSignature(mRootSignature.Get());
     cmdList->SetGraphicsRootConstantBufferView(0, mConstantBuffer->Resource()->GetGPUVirtualAddress());
     cmdList->SetGraphicsRootDescriptorTable(1, mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 

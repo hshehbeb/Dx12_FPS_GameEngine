@@ -8,6 +8,7 @@
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
+#include "UIObjectsCollection.h"
 #include "Core/Player.h"
 #include "Core/UIObject.h"
 
@@ -126,7 +127,8 @@ private:
     
 	Camera mCamera;
 
-    std::unique_ptr<UIObject> mUIObj = nullptr;
+    // std::unique_ptr<UIObject> mUIObj = nullptr;
+    std::unique_ptr<UIObjectsCollection> mUIObjs;
 
     POINT mLastMousePos;
 };
@@ -179,10 +181,12 @@ bool CameraAndDynamicIndexingApp::Initialize()
 
 	mCamera.SetPosition(0.0f, 2.0f, -10.0f);
     mPlayer = std::make_unique<Player>(mCamera);
-
     
-    mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
-    mUIObj->Initialize(*md3dDevice.Get(), *mCommandList.Get());
+    // mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
+    // mUIObj->Initialize(*md3dDevice.Get(), *mCommandList.Get());
+    
+    mUIObjs = std::make_unique<UIObjectsCollection>(md3dDevice.Get());
+    mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
     
  
 	LoadTextures();
@@ -216,10 +220,9 @@ void CameraAndDynamicIndexingApp::OnResize()
 void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
-
-
-    mUIObj->Update();
     
+    // mUIObj->Update();
+    mUIObjs->UpdateAll();
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -293,9 +296,10 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
     
 	Draw3dObjects();
     
-    mCommandList->SetPipelineState(mPSOs["ui"].Get());
-    mUIObj->Draw(mCommandList);
-
+    // mCommandList->SetPipelineState(mPSOs["ui"].Get());
+    mUIObjs->DrawAll(mCommandList.Get());
+    // mUIObj->Draw(mCommandList);
+    
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
@@ -764,38 +768,39 @@ void CameraAndDynamicIndexingApp::BuildPSOs()
 
     
     // PSO for ui objects.
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
     
-    ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-    psoDesc.InputLayout =
-    {
-        mUIObj->GetInputLayout().data(),
-        static_cast<UINT>(mUIObj->GetInputLayout().size())
-    };
-    psoDesc.pRootSignature = mUIObj->GetRootSignature().Get();
-    psoDesc.VS = 
-    {
-        reinterpret_cast<BYTE*>(mUIObj->GetVertexShaderCode()->GetBufferPointer()), 
-        mUIObj->GetVertexShaderCode()->GetBufferSize() 
-    };
-    psoDesc.PS = 
-    { 
-        reinterpret_cast<BYTE*>(mUIObj->GetPixelShaderCode()->GetBufferPointer()), 
-        mUIObj->GetPixelShaderCode()->GetBufferSize() 
-    };
-    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    psoDesc.SampleMask = UINT_MAX;
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    psoDesc.NumRenderTargets = 1;
-    psoDesc.RTVFormats[0] = mBackBufferFormat;
-    psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
-    psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
-    psoDesc.DSVFormat = mDepthStencilFormat;
-    
-    auto ret = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSOs["ui"]));
-    ThrowIfFailed(ret);
+    // D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+    //
+    // ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+    // psoDesc.InputLayout =
+    // {
+    //     mUIObj->GetInputLayout().data(),
+    //     static_cast<UINT>(mUIObj->GetInputLayout().size())
+    // };
+    // psoDesc.pRootSignature = mUIObj->GetRootSignature().Get();
+    // psoDesc.VS = 
+    // {
+    //     reinterpret_cast<BYTE*>(mUIObj->GetVertexShaderCode()->GetBufferPointer()), 
+    //     mUIObj->GetVertexShaderCode()->GetBufferSize() 
+    // };
+    // psoDesc.PS = 
+    // { 
+    //     reinterpret_cast<BYTE*>(mUIObj->GetPixelShaderCode()->GetBufferPointer()), 
+    //     mUIObj->GetPixelShaderCode()->GetBufferSize() 
+    // };
+    // psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    // psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+    // psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    // psoDesc.SampleMask = UINT_MAX;
+    // psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    // psoDesc.NumRenderTargets = 1;
+    // psoDesc.RTVFormats[0] = mBackBufferFormat;
+    // psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
+    // psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
+    // psoDesc.DSVFormat = mDepthStencilFormat;
+    //
+    // auto ret = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSOs["ui"]));
+    // ThrowIfFailed(ret);
 }
 
 void CameraAndDynamicIndexingApp::BuildFrameResources()
