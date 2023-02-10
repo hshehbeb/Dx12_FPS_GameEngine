@@ -10,6 +10,7 @@
 #include "FrameResource.h"
 #include "UIObjectsCollection.h"
 #include "Core/Actors/Actor.h"
+#include "Core/Components/GravitySimulator.h"
 #include "Core/UIWidgets/UIObject.h"
 #include "Core/Components/PlayerMovement.h"
 #include "Core/UIWidgets/AxisIndicator.h"
@@ -185,7 +186,8 @@ bool CameraAndDynamicIndexingApp::Initialize()
 	mCamera.SetPosition(0.0f, 2.0f, -10.0f);
     mPlayer2 = std::make_unique<Actor>(
         std::vector<std::shared_ptr<IComponent>> {
-            std::make_unique<PlayerMovement>(mCamera)      
+            std::make_shared<PlayerMovement>(mCamera),
+            std::make_shared<GravitySimulator>()
         }
     );
     
@@ -399,6 +401,12 @@ void CameraAndDynamicIndexingApp::OnKeyboardInput(const GameTimer& gt)
 	        comp->MoveRwd();
 	}
 
+    if (GetAsyncKeyState(' ') & 0x8000)
+    {
+        PlayerMovement* comp;
+        if (mPlayer2->TryGetComponent<PlayerMovement>(&comp)) 
+            comp->Jump(mPlayer2.get());
+    }
 
 	mCamera.UpdateViewMatrix();
 }

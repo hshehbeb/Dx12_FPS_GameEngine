@@ -1,5 +1,8 @@
 ﻿#include "PlayerMovement.h"
 
+#include "GravitySimulator.h"
+#include "../Actors/Actor.h"
+
 PlayerMovement::PlayerMovement(Camera& camera, float&& moveSpeed, float&& jumpSpeed)
     : MoveSpeed(moveSpeed)
     , JumpSpeed(jumpSpeed)
@@ -60,8 +63,14 @@ void PlayerMovement::MoveLwd()
     MoveClampToSurface(ReverseVector(mCamera.GetRight3f()));
 }
 
-void PlayerMovement::Jump()
+void PlayerMovement::Jump(Actor* owner)
 {
+    GravitySimulator* gravitySimulator;
+    if (owner->TryGetComponent<GravitySimulator>(&gravitySimulator))
+    {
+        gravitySimulator->IgnoreSimulationForThisFrame();
+    }
+    
     DirectX::XMFLOAT3 mvDir = {0,1,0};
     MoveFree(mvDir);
 }

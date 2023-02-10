@@ -19,7 +19,7 @@ public:
     void MoveBwd();
     void MoveRwd();
     void MoveLwd();
-    void Jump();
+    void Jump(Actor* owner);
     void MoveFree(DirectX::XMFLOAT3 direction);
 
     DirectX::XMFLOAT3 GetPosition();
