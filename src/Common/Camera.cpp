@@ -37,6 +37,11 @@ void Camera::SetPosition(const XMFLOAT3& v)
 	mViewDirty = true;
 }
 
+Rotation Camera::GetRotation() const
+{
+    return mRot;
+}
+
 XMVECTOR Camera::GetRight()const
 {
 	return XMLoadFloat3(&mRight);
@@ -208,6 +213,9 @@ void Camera::Pitch(float angle)
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
 
 	mViewDirty = true;
+
+
+    mRot.EulerAngle.y += angle / 3.14159265 * 180.0f;
 }
 
 void Camera::RotateY(float angle)
@@ -221,6 +229,9 @@ void Camera::RotateY(float angle)
 	XMStoreFloat3(&mLook, XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
 
 	mViewDirty = true;
+
+    
+    mRot.EulerAngle.z += angle / 3.14159265 * 180.0f; 
 }
 
 void Camera::UpdateViewMatrix()

@@ -1,11 +1,14 @@
 ﻿#pragma once
+#include "Core/AxisIndicator.h"
 #include "Core/UIObject.h"
 
 class UIObjectsCollection
 {
 public:
-    UIObjectsCollection(ID3D12Device* device)
+    UIObjectsCollection(ID3D12Device* device, AxisIndicator* axisIndicator)
     {
+        mAxisIndicator = axisIndicator;
+        
         mUIObjectsRegistry["sample_text"] = std::make_unique<UIObject>(
             ScreenSpacePoint {200, 200},
             100, 100
@@ -36,6 +39,7 @@ private:
     t_PSOsRegistry mPSOs;
     t_ShaderRegistry mShaders;
     t_RootSignatureRegistry mRootSignatures;
+    AxisIndicator* mAxisIndicator; 
 
 private:
     t_UIObjectsList GrabAllUIObjectsFromRegistry() const;

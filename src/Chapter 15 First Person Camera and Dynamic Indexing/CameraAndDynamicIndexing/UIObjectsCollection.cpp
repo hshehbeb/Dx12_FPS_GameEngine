@@ -6,12 +6,16 @@ void UIObjectsCollection::InitAll(ID3D12Device* device, ID3D12GraphicsCommandLis
 {
     for (const auto& uiObj : mUIObjects)
         uiObj->Initialize(*device, *cmdList);
+
+    mAxisIndicator->Initailize(*device, *cmdList);
 }
 
 void UIObjectsCollection::UpdateAll()
 {
     for (const auto& uiObj : mUIObjects)
         uiObj->Update();
+
+    mAxisIndicator->Update();
 }
 
 void UIObjectsCollection::DrawAll(ID3D12GraphicsCommandList* cmdList)
@@ -21,6 +25,8 @@ void UIObjectsCollection::DrawAll(ID3D12GraphicsCommandList* cmdList)
     
     for (const auto& uiObj : mUIObjects)
         uiObj->Draw(cmdList);
+
+    mAxisIndicator->Draw(cmdList);
 }
 
 UIObjectsCollection::t_UIObjectsList UIObjectsCollection::GrabAllUIObjectsFromRegistry() const

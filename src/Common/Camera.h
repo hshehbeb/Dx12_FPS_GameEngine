@@ -12,6 +12,7 @@
 #define CAMERA_H
 
 #include "d3dUtil.h"
+#include "../Chapter 15 First Person Camera and Dynamic Indexing/CameraAndDynamicIndexing/DataStructures/Rotation.h"
 
 class Camera
 {
@@ -25,6 +26,7 @@ public:
 	DirectX::XMFLOAT3 GetPosition3f()const;
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const DirectX::XMFLOAT3& v);
+    Rotation GetRotation() const;
 	
 	// Get camera basis vectors.
 	DirectX::XMVECTOR GetRight()const;
@@ -79,6 +81,8 @@ private:
 	DirectX::XMFLOAT3 mRight = { 1.0f, 0.0f, 0.0f };
 	DirectX::XMFLOAT3 mUp = { 0.0f, 1.0f, 0.0f };
 	DirectX::XMFLOAT3 mLook = { 0.0f, 0.0f, 1.0f };
+
+    Rotation mRot {0, 0, 0};
 
 	// Cache frustum properties.
 	float mNearZ = 0.0f;

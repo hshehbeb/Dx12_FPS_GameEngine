@@ -129,6 +129,7 @@ private:
 
     // std::unique_ptr<UIObject> mUIObj = nullptr;
     std::unique_ptr<UIObjectsCollection> mUIObjs;
+    std::unique_ptr<AxisIndicator> mAxisIndicator;
 
     POINT mLastMousePos;
 };
@@ -184,8 +185,13 @@ bool CameraAndDynamicIndexingApp::Initialize()
     
     // mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
     // mUIObj->Initialize(*md3dDevice.Get(), *mCommandList.Get());
-    
-    mUIObjs = std::make_unique<UIObjectsCollection>(md3dDevice.Get());
+
+    mAxisIndicator = std::make_unique<AxisIndicator>(
+        ScreenSpacePoint {100, 100}, 50, 50, &mCamera
+        );
+    mUIObjs = std::make_unique<UIObjectsCollection>(
+        md3dDevice.Get(), mAxisIndicator.get()
+        );
     mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
     
  
@@ -221,7 +227,7 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
     
-    // mUIObj->Update();
+    // mPlayer->Update();
     mUIObjs->UpdateAll();
 
     // Cycle through the circular frame resource array.
