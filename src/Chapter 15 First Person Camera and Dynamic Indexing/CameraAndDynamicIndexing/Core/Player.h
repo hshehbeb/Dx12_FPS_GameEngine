@@ -3,7 +3,7 @@
 
 #include "../../../Common/Camera.h"
 
-class Player
+XM_DEPRECATED class Player
 {
 public:
     float Speed;

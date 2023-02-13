@@ -9,8 +9,10 @@
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
 #include "UIObjectsCollection.h"
+#include "Core/Actor.h"
 #include "Core/Player.h"
 #include "Core/UIObject.h"
+#include "Core/Components/PlayerMovement.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -122,8 +124,6 @@ private:
 	std::vector<RenderItem*> mOpaqueRitems;
 
     PassConstants mMainPassCB;
-
-    std::unique_ptr<Player> mPlayer = nullptr;
     
 	Camera mCamera;
 
@@ -132,6 +132,7 @@ private:
     std::unique_ptr<AxisIndicator> mAxisIndicator;
 
     POINT mLastMousePos;
+    std::unique_ptr<Actor> mPlayer2;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
@@ -181,7 +182,11 @@ bool CameraAndDynamicIndexingApp::Initialize()
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	mCamera.SetPosition(0.0f, 2.0f, -10.0f);
-    mPlayer = std::make_unique<Player>(mCamera);
+    mPlayer2 = std::make_unique<Actor>(
+        std::vector<std::shared_ptr<IComponent>> {
+            std::make_unique<PlayerMovement>(mCamera)      
+        }
+    );
     
     // mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
     // mUIObj->Initialize(*md3dDevice.Get(), *mCommandList.Get());
@@ -225,6 +230,8 @@ void CameraAndDynamicIndexingApp::OnResize()
 
 void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 {
+    mPlayer2->Update();
+    
     OnKeyboardInput(gt);
     
     // mPlayer->Update();
@@ -364,16 +371,33 @@ void CameraAndDynamicIndexingApp::OnKeyboardInput(const GameTimer& gt)
 	const float dt = gt.DeltaTime();
 
 	if(GetAsyncKeyState('W') & 0x8000)
-	    mPlayer->MoveFwd();
+	{
+	    PlayerMovement* comp;
+	    if (mPlayer2->TryGetComponent<PlayerMovement>(&comp)) 
+	        comp->MoveFwd();
+	}
 
 	if(GetAsyncKeyState('S') & 0x8000)
-	    mPlayer->MoveBwd();
+	{
+	    PlayerMovement* comp;
+	    if (mPlayer2->TryGetComponent<PlayerMovement>(&comp)) 
+	        comp->MoveBwd();
+	}
 
 	if(GetAsyncKeyState('A') & 0x8000)
-	    mPlayer->MoveLwd();
+	{
+	    PlayerMovement* comp;
+	    if (mPlayer2->TryGetComponent<PlayerMovement>(&comp)) 
+	        comp->MoveLwd();
+	}
 
 	if(GetAsyncKeyState('D') & 0x8000)
-	    mPlayer->MoveRwd();
+	{
+	    PlayerMovement* comp;
+	    if (mPlayer2->TryGetComponent<PlayerMovement>(&comp)) 
+	        comp->MoveRwd();
+	}
+
 
 	mCamera.UpdateViewMatrix();
 }

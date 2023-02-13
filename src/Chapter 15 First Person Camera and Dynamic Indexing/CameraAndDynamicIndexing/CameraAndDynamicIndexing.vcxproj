@@ -150,7 +150,9 @@
     <ClCompile Include="..\..\Common\GeometryGenerator.cpp" />
     <ClCompile Include="..\..\Common\MathHelper.cpp" />
     <ClCompile Include="CameraAndDynamicIndexingApp.cpp" />
+    <ClCompile Include="Core\Actor.cpp" />
     <ClCompile Include="Core\AxisIndicator.cpp" />
+    <ClCompile Include="Core\Components\PlayerMovement.cpp" />
     <ClCompile Include="Core\Player.cpp" />
     <ClCompile Include="Core\UIObject.cpp" />
     <ClCompile Include="FrameResource.cpp" />
@@ -166,7 +168,10 @@
     <ClInclude Include="..\..\Common\GeometryGenerator.h" />
     <ClInclude Include="..\..\Common\MathHelper.h" />
     <ClInclude Include="..\..\Common\UploadBuffer.h" />
+    <ClInclude Include="Core\Actor.h" />
     <ClInclude Include="Core\AxisIndicator.h" />
+    <ClInclude Include="Core\Components\IComponent.h" />
+    <ClInclude Include="Core\Components\PlayerMovement.h" />
     <ClInclude Include="Core\Player.h" />
     <ClInclude Include="Core\UIObject.h" />
     <ClInclude Include="DataStructures\Rotation.h" />
