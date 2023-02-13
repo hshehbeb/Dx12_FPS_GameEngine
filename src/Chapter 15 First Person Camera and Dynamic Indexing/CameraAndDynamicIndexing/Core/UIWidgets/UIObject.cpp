@@ -1,10 +1,10 @@
 ﻿#include <D3Dcompiler.h>
 
 #include "UIObject.h"
-#include "../../../Common/DDSTextureLoader.h"
-#include "../../../Common/d3dApp.h"
-#include "../../../Common/d3dUtil.h"
-#include "../DataStructures/Vertex.h"
+#include "../../../../Common/DDSTextureLoader.h"
+#include "../../../../Common/d3dApp.h"
+#include "../../../../Common/d3dUtil.h"
+#include "../../DataStructures/Vertex.h"
 
 struct Vertex;
 

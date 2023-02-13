@@ -4,9 +4,9 @@
 #include <memory>
 #include <wrl/client.h>
 
-#include "../../../Common/Camera.h"
-#include "../../../Common/UploadBuffer.h"
-#include "../DataStructures/ScreenSpacePoint.h"
+#include "../../../../Common/Camera.h"
+#include "../../../../Common/UploadBuffer.h"
+#include "../../DataStructures/ScreenSpacePoint.h"
 
 class AxisIndicator
 {

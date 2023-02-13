@@ -5,8 +5,8 @@
 #include <vector>
 #include <wrl/client.h>
 
-#include "../../../Common/UploadBuffer.h"
-#include "../DataStructures/ScreenSpacePoint.h"
+#include "../../../../Common/UploadBuffer.h"
+#include "../../DataStructures/ScreenSpacePoint.h"
 
 struct MeshGeometry;
 

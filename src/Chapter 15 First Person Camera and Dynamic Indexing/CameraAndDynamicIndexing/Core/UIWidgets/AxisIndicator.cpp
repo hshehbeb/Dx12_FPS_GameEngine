@@ -1,8 +1,8 @@
 ﻿#include "AxisIndicator.h"
-#include "../../../Common/d3dUtil.h"
-#include "../../../Common/d3dApp.h"
-#include "../DataStructures/Rotation.h"
-#include "../DataStructures/Vertex.h"
+#include "../../../../Common/d3dUtil.h"
+#include "../../../../Common/d3dApp.h"
+#include "../../DataStructures/Rotation.h"
+#include "../../DataStructures/Vertex.h"
 
 AxisIndicator::AxisIndicator(
     ScreenSpacePoint position, int width, int height, Camera* camera)

@@ -1,6 +1,7 @@
 ﻿#pragma once
-#include "Core/AxisIndicator.h"
-#include "Core/UIObject.h"
+#include "Core/UIWidgets/AxisIndicator.h"
+#include "Core/UIWidgets/UIObject.h"
+#include "DataStructures/ScreenSpacePoint.h"
 
 class UIObjectsCollection
 {

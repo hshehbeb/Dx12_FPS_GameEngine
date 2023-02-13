@@ -9,10 +9,11 @@
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
 #include "UIObjectsCollection.h"
-#include "Core/Actor.h"
-#include "Core/Player.h"
-#include "Core/UIObject.h"
+#include "Core/Actors/Actor.h"
+#include "Core/UIWidgets/UIObject.h"
 #include "Core/Components/PlayerMovement.h"
+#include "Core/UIWidgets/AxisIndicator.h"
+#include "DataStructures/ScreenSpacePoint.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;

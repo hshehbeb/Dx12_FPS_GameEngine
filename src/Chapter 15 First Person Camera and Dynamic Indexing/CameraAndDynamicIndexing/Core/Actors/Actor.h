@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Components/IComponent.h"
+#include "../Components/IComponent.h"
 
 // Actor gives you ability to attach components 
 class Actor
