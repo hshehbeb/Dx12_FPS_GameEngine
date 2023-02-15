@@ -11,7 +11,6 @@
 #include "UIObjectsCollection.h"
 #include "Core/Actors/Actor.h"
 #include "Core/Components/GravitySimulator.h"
-#include "Core/UIWidgets/UIObject.h"
 #include "Core/Components/PlayerMovement.h"
 #include "Core/UIWidgets/AxisIndicator.h"
 #include "DataStructures/ScreenSpacePoint.h"
@@ -194,6 +193,8 @@ bool CameraAndDynamicIndexingApp::Initialize()
     // mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
     // mUIObj->Initialize(*md3dDevice.Get(), *mCommandList.Get());
 
+	LoadTextures();
+
     mAxisIndicator = std::make_unique<AxisIndicator>(
         ScreenSpacePoint {100, 100}, 50, 50, &mCamera
         );
@@ -203,7 +204,6 @@ bool CameraAndDynamicIndexingApp::Initialize()
     mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
     
  
-	LoadTextures();
     BuildRootSignature();
 	BuildDescriptorHeaps();
     BuildShadersAndInputLayout();
@@ -533,10 +533,31 @@ void CameraAndDynamicIndexingApp::LoadTextures()
 		mCommandList.Get(), crateTex->Filename.c_str(),
 		crateTex->Resource, crateTex->UploadHeap));
 
+    auto playerBodyTex = std::make_unique<Texture>();
+    playerBodyTex->Name = "playerTex";
+    playerBodyTex->Filename = L"../../Textures/T_FirstPerson_0.dds";
+    ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
+        mCommandList.Get(), playerBodyTex->Filename.c_str(),
+        playerBodyTex->Resource, playerBodyTex->UploadHeap));
+
 	mTextures[bricksTex->Name] = std::move(bricksTex);
 	mTextures[stoneTex->Name] = std::move(stoneTex);
 	mTextures[tileTex->Name] = std::move(tileTex);
 	mTextures[crateTex->Name] = std::move(crateTex);
+	mTextures[playerBodyTex->Name] = std::move(playerBodyTex);
+
+    for (int i = 0; i < Resources::AvailableCharactersCount; i++)
+    {
+        auto charTex = std::make_unique<Texture>();
+        charTex->Name = std::string("charTex") + std::to_string(i);
+        charTex->Filename = L"../../Textures/uncompressed.dds";
+        ThrowIfFailed(::CreateDDSTextureForNextChar(
+            md3dDevice.Get(), mCommandList.Get(), charTex->Filename.c_str(),
+            charTex->Resource, charTex->UploadHeap)
+        );
+        Resources::CharacterTextures[i] = std::move(charTex);
+    }
+
 }
 
 void CameraAndDynamicIndexingApp::BuildRootSignature()

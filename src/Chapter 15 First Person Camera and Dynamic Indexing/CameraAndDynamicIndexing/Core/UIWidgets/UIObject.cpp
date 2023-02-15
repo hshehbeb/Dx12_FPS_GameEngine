@@ -8,16 +8,17 @@
 
 struct Vertex;
 
-UIObject::UIObject(ScreenSpacePoint position, int width, int height)
+UIObject::UIObject(ScreenSpacePoint position, int width, int height, Texture* pTexture)
     : position(position)
     , width(width)
     , height(height)
+    , mTexture(pTexture)
 {
 }
 
 void UIObject::Initialize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
 {
-    LoadTexture(&device, &cmdList);
+    // LoadTexture(&device, &cmdList);
     BuildDescriptorHeap(device);
     BuildConstantBuffer(device);
     BuildQuadGeometry(device, cmdList);
@@ -59,14 +60,14 @@ void UIObject::LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* cmdL
     //
     // == end ==
 
-    mTexture = std::make_unique<Texture>();
-    mTexture->Name = "uiTex";
-    mTexture->Filename = L"../../Textures/uncompressed.dds";
-    
-    ThrowIfFailed(::GenerateFontAssets(
-        device, cmdList, mTexture->Filename.c_str(),
-        mTexture->Resource, mTexture->UploadHeap)
-    );
+    // mTexture = std::make_unique<Texture>();
+    // mTexture->Name = "uiTex";
+    // mTexture->Filename = L"../../Textures/uncompressed.dds";
+    //
+    // ThrowIfFailed(::CreateDDSTextureFromNextChar(
+    //     device, cmdList, mTexture->Filename.c_str(),
+    //     mTexture->Resource, mTexture->UploadHeap)
+    // );
 }
 
 void UIObject::BuildDescriptorHeap(ID3D12Device& device)

@@ -171,7 +171,7 @@ namespace DirectX
                                     );
 }
 
-HRESULT GenerateFontAssets(
+HRESULT CreateDDSTextureForNextChar(
     _In_ ID3D12Device* device,                      
     _In_ ID3D12GraphicsCommandList* cmdList,        
     _In_z_ const wchar_t* szFileName,               

@@ -2,6 +2,13 @@
 #include "Core/UIWidgets/AxisIndicator.h"
 #include "Core/UIWidgets/UIObject.h"
 #include "DataStructures/ScreenSpacePoint.h"
+#include "Resources.h"
+
+// namespace Resources
+// {
+//     const unsigned int AvailableCharactersCount;
+//     std::vector<std::unique_ptr<Texture>> CharacterTextures;
+// }
 
 class UIObjectsCollection
 {
@@ -12,11 +19,13 @@ public:
         
         mUIObjectsRegistry["sample_text"] = std::make_unique<UIObject>(
             ScreenSpacePoint {200, 200},
-            100, 100
+            100, 100,
+            Resources::CharacterTextures[0].get()
             );
         mUIObjectsRegistry["sample_text2"] = std::make_unique<UIObject>(
             ScreenSpacePoint {300, 300},
-            50, 50
+            50, 50,
+            Resources::CharacterTextures[1].get()
             );
 
         mUIObjects = GrabAllUIObjectsFromRegistry();

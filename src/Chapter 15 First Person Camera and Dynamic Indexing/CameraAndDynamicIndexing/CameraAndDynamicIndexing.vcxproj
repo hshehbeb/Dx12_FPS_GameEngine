@@ -209,7 +209,6 @@
     </ClCompile>
     <ClCompile Include="Core\Components\PlayerMovement.cpp" />
     <ClCompile Include="Core\Components\GravitySimulator.cpp" />
-    <ClCompile Include="Core\Player.cpp" />
     <ClCompile Include="Core\UIWidgets\AxisIndicator.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -349,6 +348,7 @@
     <ClInclude Include="DataStructures\Vertex.h" />
     <ClInclude Include="DataStructures\WorldSpacePoint.h" />
     <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="Resources.h" />
     <ClInclude Include="UIObjectsCollection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

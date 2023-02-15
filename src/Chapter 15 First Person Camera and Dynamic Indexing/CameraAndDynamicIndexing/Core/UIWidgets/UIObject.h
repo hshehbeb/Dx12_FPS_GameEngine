@@ -20,7 +20,7 @@ public:
     int height;
 
 public:
-    explicit UIObject(ScreenSpacePoint position, int width, int height);
+    explicit UIObject(ScreenSpacePoint position, int width, int height, Texture* pTexture);
 
     void Initialize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList);
     void Draw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList);
@@ -32,7 +32,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr;
     std::unique_ptr<UploadBuffer<ConstantBuffer>> mConstantBuffer = nullptr;
-    std::unique_ptr<Texture> mTexture = nullptr;
+    Texture* mTexture = nullptr;
 
 private:
     DirectX::XMFLOAT4X4 CalculateMVPMatrix() const;

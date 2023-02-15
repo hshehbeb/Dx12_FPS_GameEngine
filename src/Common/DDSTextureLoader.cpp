@@ -2189,13 +2189,13 @@ void ReadNextCharacter(DDS_HEADER* header, _Out_ uint8_t* bitData)
     }
 }
 
-HRESULT GenerateFontAssets(
+HRESULT CreateDDSTextureForNextChar(
     _In_ ID3D12Device* device,                      
     _In_ ID3D12GraphicsCommandList* cmdList,        
     _In_z_ const wchar_t* szFileName,               
     _Out_ ComPtr<ID3D12Resource>& texture,          
     _Out_ ComPtr<ID3D12Resource>& textureUploadHeap,
-_In_ size_t maxsize,
+    _In_ size_t maxsize,
     _Out_opt_ DDS_ALPHA_MODE* alphaMode)
 {
     if (texture)
