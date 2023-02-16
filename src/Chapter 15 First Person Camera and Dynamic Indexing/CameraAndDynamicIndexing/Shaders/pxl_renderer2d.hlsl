@@ -1,15 +1,7 @@
-//***************************************************************************************
-// color.hlsl by Frank Luna (C) 2015 All Rights Reserved.
-//
-// Transforms and colors geometry.
-//***************************************************************************************
+// arthur: sherlockcai
+// date:   2023.2
 
-// cbuffer cbPerObject : register(b0)
-// {
-// 	float4x4 gWorldViewProj; 
-// };
-
-// StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
+#define ALPHA_TEST
 
 Texture2D tex : register(t0);
 
@@ -20,8 +12,6 @@ SamplerState gsamLinearClamp      : register(s3);
 SamplerState gsamAnisotropicWrap  : register(s4);
 SamplerState gsamAnisotropicClamp : register(s5);
 
-// SamplerState s1 : register(s0);
-
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
@@ -31,9 +21,13 @@ struct VertexOut
 
 float4 main(VertexOut pin) : SV_TARGET
 {
-    // return pin.Color;
-    // return float4(pin.Uv, 0, 0);
-    return tex.Sample(gsamLinearWrap, pin.Uv);
+    float4 sampleColor = tex.Sample(gsamLinearWrap, pin.Uv);;
+
+#ifdef ALPHA_TEST
+    clip(sampleColor.a - 0.1f);
+#endif
+    
+    return sampleColor;
 }
 
 

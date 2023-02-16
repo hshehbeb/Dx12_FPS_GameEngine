@@ -112,7 +112,7 @@ private:
 
 	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
 	std::unordered_map<std::string, std::unique_ptr<Material>> mMaterials;
-	std::unordered_map<std::string, std::unique_ptr<Texture>> mTextures;
+	// std::unordered_map<std::string, std::unique_ptr<Texture>> mTextures;
 	std::unordered_map<std::string, ComPtr<ID3DBlob>> mShaders;
 	std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> mPSOs;
 
@@ -190,9 +190,6 @@ bool CameraAndDynamicIndexingApp::Initialize()
         }
     );
     
-    // mUIObj = std::make_unique<UIObject>(ScreenSpacePoint{200, 200}, 100, 100);
-    // mUIObj->Initialize(*md3dDevice.Get(), *mCommandList.Get());
-
 	LoadTextures();
 
     mAxisIndicator = std::make_unique<AxisIndicator>(
@@ -540,11 +537,19 @@ void CameraAndDynamicIndexingApp::LoadTextures()
         mCommandList.Get(), playerBodyTex->Filename.c_str(),
         playerBodyTex->Resource, playerBodyTex->UploadHeap));
 
-	mTextures[bricksTex->Name] = std::move(bricksTex);
-	mTextures[stoneTex->Name] = std::move(stoneTex);
-	mTextures[tileTex->Name] = std::move(tileTex);
-	mTextures[crateTex->Name] = std::move(crateTex);
-	mTextures[playerBodyTex->Name] = std::move(playerBodyTex);
+    auto crosshairsTex = std::make_unique<Texture>();
+    crosshairsTex->Name = "crosshairsTex";
+    crosshairsTex->Filename = L"../../Textures/T_Crosshairs.dds";
+    ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
+        mCommandList.Get(), crosshairsTex->Filename.c_str(),
+        crosshairsTex->Resource, crosshairsTex->UploadHeap));
+
+	Resources::RegularTextures[bricksTex->Name] = std::move(bricksTex);
+	Resources::RegularTextures[stoneTex->Name] = std::move(stoneTex);
+	Resources::RegularTextures[tileTex->Name] = std::move(tileTex);
+	Resources::RegularTextures[crateTex->Name] = std::move(crateTex);
+	Resources::RegularTextures[playerBodyTex->Name] = std::move(playerBodyTex);
+	Resources::RegularTextures[crosshairsTex->Name] = std::move(crosshairsTex);
 
     for (int i = 0; i < Resources::AvailableCharactersCount; i++)
     {
@@ -617,10 +622,10 @@ void CameraAndDynamicIndexingApp::BuildDescriptorHeaps()
 	//
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(mSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-	auto bricksTex = mTextures["bricksTex"]->Resource;
-	auto stoneTex = mTextures["stoneTex"]->Resource;
-	auto tileTex = mTextures["tileTex"]->Resource;
-	auto crateTex = mTextures["crateTex"]->Resource;
+	auto bricksTex = Resources::RegularTextures["bricksTex"]->Resource;
+	auto stoneTex = Resources::RegularTextures["stoneTex"]->Resource;
+	auto tileTex = Resources::RegularTextures["tileTex"]->Resource;
+	auto crateTex = Resources::RegularTextures["crateTex"]->Resource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;

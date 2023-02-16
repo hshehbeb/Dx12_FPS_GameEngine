@@ -28,6 +28,20 @@ public:
             Resources::CharacterTextures[1].get()
             );
 
+        /* player body */
+        mUIObjectsRegistry["player_body"] = std::make_unique<UIObject>(
+            ScreenSpacePoint {1200, 200},
+            550, 500,
+            Resources::RegularTextures["playerTex"].get()
+            );
+
+        /* crosshairs */
+        mUIObjectsRegistry["crosshairs"] = std::make_unique<UIObject>(
+            ScreenSpacePoint {800, 620},
+            70, 70,
+            Resources::RegularTextures["crosshairsTex"].get()
+            );
+        
         mUIObjects = GrabAllUIObjectsFromRegistry();
         mPSOs = BuildPSOs(device);
     }
