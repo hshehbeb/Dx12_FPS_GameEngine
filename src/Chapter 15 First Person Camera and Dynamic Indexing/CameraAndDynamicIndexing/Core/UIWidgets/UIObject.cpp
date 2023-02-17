@@ -9,7 +9,8 @@
 struct Vertex;
 
 UIObject::UIObject(ScreenSpacePoint position, int width, int height, Texture* pTexture)
-    : position(position)
+    : shouldDraw(true)
+    , position(position)
     , width(width)
     , height(height)
     , mTexture(pTexture)
@@ -42,32 +43,6 @@ DirectX::XMFLOAT4X4 UIObject::CalculateMVPMatrix() const
         0, 0, 0, 0,
         b, d, z, 1
     };
-}
-
-void UIObject::LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
-{
-    // load ready-to-use textures 
-    // == begin ==
-    //
-    // mTexture = std::make_unique<Texture>();
-    // mTexture->Name = "uiTex";
-    // mTexture->Filename = L"../../Textures/grass.dds";
-    //
-    // ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(device,
-    //     cmdList, mTexture->Filename.c_str(),
-    //     mTexture->Resource, mTexture->UploadHeap)
-    // );
-    //
-    // == end ==
-
-    // mTexture = std::make_unique<Texture>();
-    // mTexture->Name = "uiTex";
-    // mTexture->Filename = L"../../Textures/uncompressed.dds";
-    //
-    // ThrowIfFailed(::CreateDDSTextureFromNextChar(
-    //     device, cmdList, mTexture->Filename.c_str(),
-    //     mTexture->Resource, mTexture->UploadHeap)
-    // );
 }
 
 void UIObject::BuildDescriptorHeap(ID3D12Device& device)
@@ -176,6 +151,11 @@ void UIObject::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList
 
 void UIObject::Draw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList)
 {
+    if (!shouldDraw)
+    {
+        return;
+    }
+    
     ID3D12DescriptorHeap* descriptorHeaps[] = {mSrvDescriptorHeap.Get()};
     cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 

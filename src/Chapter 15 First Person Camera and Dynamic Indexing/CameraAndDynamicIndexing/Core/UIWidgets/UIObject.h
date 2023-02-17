@@ -15,6 +15,7 @@ class UIObject
     struct ConstantBuffer { DirectX::XMFLOAT4X4 MVPMatrix = MathHelper::Identity4x4(); };
     
 public:
+    bool shouldDraw;
     ScreenSpacePoint position;
     int width;
     int height;
@@ -36,7 +37,6 @@ private:
 
 private:
     DirectX::XMFLOAT4X4 CalculateMVPMatrix() const;
-    void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
     void BuildDescriptorHeap(ID3D12Device& device);
     void BuildConstantBuffer(ID3D12Device& device);
     void BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList);
