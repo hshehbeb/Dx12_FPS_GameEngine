@@ -2,6 +2,11 @@
 
 #include "../../Common/d3dApp.h"
 
+void UIObjectsCollection::Add(std::shared_ptr<UIObject> uiObj)
+{
+    mUIObjects.push_back(uiObj);
+}
+
 void UIObjectsCollection::InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
     for (const auto& uiObj : mUIObjects)
@@ -27,20 +32,6 @@ void UIObjectsCollection::DrawAll(ID3D12GraphicsCommandList* cmdList)
         uiObj->Draw(cmdList);
 
     mAxisIndicator->Draw(cmdList);
-}
-
-UIObjectsCollection::t_UIObjectsList UIObjectsCollection::GrabAllUIObjectsFromRegistry() const
-{
-    t_UIObjectsList result {};
-        
-    for (auto const& pair : mUIObjectsRegistry)
-    {
-        auto& uiObj = pair.second;
-        
-        result.push_back(uiObj);
-    }
-
-    return result;
 }
 
 UIObjectsCollection::t_PSOsRegistry UIObjectsCollection::BuildPSOs(ID3D12Device* device)

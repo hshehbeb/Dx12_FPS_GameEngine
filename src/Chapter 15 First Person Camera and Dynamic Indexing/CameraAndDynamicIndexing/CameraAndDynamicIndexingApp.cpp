@@ -193,11 +193,16 @@ bool CameraAndDynamicIndexingApp::Initialize()
 	LoadTextures();
 
     mAxisIndicator = std::make_unique<AxisIndicator>(
-        ScreenSpacePoint {100, 100}, 50, 50, &mCamera
-        );
+        ScreenSpacePoint {100, 100}, 50, 50, &mCamera);
     mUIObjs = std::make_unique<UIObjectsCollection>(
         md3dDevice.Get(), mAxisIndicator.get()
         );
+
+    mUIObjs->Add(std::make_shared<UIObject>(
+        ScreenSpacePoint {50, 50}, 50, 50,
+        Resources::RegularTextures["crosshairsTex"].get())
+        );
+    
     mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
     
  

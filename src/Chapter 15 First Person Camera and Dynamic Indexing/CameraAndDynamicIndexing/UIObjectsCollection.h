@@ -17,34 +17,36 @@ public:
     {
         mAxisIndicator = axisIndicator;
         
-        mUIObjectsRegistry["sample_text"] = std::make_unique<UIObject>(
+        mUIObjects.push_back(std::make_unique<UIObject>(
             ScreenSpacePoint {200, 200},
             100, 100,
-            Resources::CharacterTextures[0].get()
+            Resources::CharacterTextures[0].get())
             );
-        mUIObjectsRegistry["sample_text2"] = std::make_unique<UIObject>(
+        mUIObjects.push_back(std::make_unique<UIObject>(
             ScreenSpacePoint {300, 300},
             50, 50,
-            Resources::CharacterTextures[1].get()
+            Resources::CharacterTextures[1].get())
             );
 
         /* player body */
-        mUIObjectsRegistry["player_body"] = std::make_unique<UIObject>(
+        mUIObjects.push_back(std::make_unique<UIObject>(
             ScreenSpacePoint {1200, 200},
             550, 500,
-            Resources::RegularTextures["playerTex"].get()
+            Resources::RegularTextures["playerTex"].get())
             );
 
         /* crosshairs */
-        mUIObjectsRegistry["crosshairs"] = std::make_unique<UIObject>(
+        mUIObjects.push_back(std::make_unique<UIObject>(
             ScreenSpacePoint {800, 620},
             70, 70,
-            Resources::RegularTextures["crosshairsTex"].get()
+            Resources::RegularTextures["crosshairsTex"].get())
             );
         
-        mUIObjects = GrabAllUIObjectsFromRegistry();
+        // mUIObjects = GrabAllUIObjectsFromRegistry();
         mPSOs = BuildPSOs(device);
     }
+
+    void Add(std::shared_ptr<UIObject> uiObj);
     
     void InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
     void UpdateAll();
@@ -58,7 +60,6 @@ private:
     typedef std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12RootSignature>> t_RootSignatureRegistry; 
 
 private:
-    t_UIObjectsRegistry mUIObjectsRegistry;
     t_UIObjectsList mUIObjects;
     t_PSOsRegistry mPSOs;
     t_ShaderRegistry mShaders;
@@ -66,7 +67,6 @@ private:
     AxisIndicator* mAxisIndicator; 
 
 private:
-    t_UIObjectsList GrabAllUIObjectsFromRegistry() const;
     t_PSOsRegistry BuildPSOs(ID3D12Device* device);
     void UIObjectsCollection::BuildPSO(ID3D12Device* device, IN std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout, IN ID3D12RootSignature* pRootSignature, IN D3D12_SHADER_BYTECODE vsByteCode, IN D3D12_SHADER_BYTECODE psByteCode, OUT Microsoft::WRL::ComPtr<ID3D12PipelineState>& resultPSO);
     void BuildStdUiPSO(ID3D12Device* device, Microsoft::WRL::ComPtr<ID3D12PipelineState>& resultPSO);
