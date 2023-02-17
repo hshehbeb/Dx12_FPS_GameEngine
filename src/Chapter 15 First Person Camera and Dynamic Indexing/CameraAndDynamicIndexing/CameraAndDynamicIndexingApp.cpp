@@ -204,8 +204,8 @@ bool CameraAndDynamicIndexingApp::Initialize()
         );
 
     mButtons.push_back(std::make_unique<Button>(
-        ScreenSpacePoint {800, 600},
-        20, 20,
+        ScreenSpacePoint {100, 500},
+        50, 50,
         Resources::RegularTextures["crateTex"].get())
         );
     for (auto& btn : mButtons)

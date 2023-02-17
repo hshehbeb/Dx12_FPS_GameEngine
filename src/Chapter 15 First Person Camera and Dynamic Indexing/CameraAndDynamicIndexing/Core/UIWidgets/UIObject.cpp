@@ -29,10 +29,10 @@ DirectX::XMFLOAT4X4 UIObject::CalculateMVPMatrix() const
     float W = D3DApp::GetApp()->mClientWidth;
     float H = D3DApp::GetApp()->mClientHeight;
     
-    float a = width / W;
-    float b = position.x / W - 1;
-    float c = height / H;
-    float d = position.y / H - 1;
+    float a = width * 2 / W;
+    float b = position.x * 2 / W - 1;
+    float c = height * 2 / H;
+    float d = -position.y * 2 / H + 1;
     float z = 0.01f;
 
     return DirectX::XMFLOAT4X4

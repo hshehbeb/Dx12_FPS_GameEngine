@@ -18,27 +18,47 @@ public:
         mAxisIndicator = axisIndicator;
         
         mUIObjects.push_back(std::make_unique<UIObject>(
-            ScreenSpacePoint {0, 0},
-            30, 30,
+            ScreenSpacePoint {100, 100},
+            100, 100,
             Resources::CharacterTextures[0].get())
             );
         mUIObjects.push_back(std::make_unique<UIObject>(
-            ScreenSpacePoint {300, 300},
-            50, 50,
+            ScreenSpacePoint {200, 100},
+            100, 100,
             Resources::CharacterTextures[1].get())
+            );
+        mUIObjects.push_back(std::make_unique<UIObject>(
+            ScreenSpacePoint {300, 100},
+            100, 100,
+            Resources::CharacterTextures[2].get())
+            );
+        mUIObjects.push_back(std::make_unique<UIObject>(
+            ScreenSpacePoint {400, 100},
+            100, 100,
+            Resources::CharacterTextures[3].get())
+            );
+        mUIObjects.push_back(std::make_unique<UIObject>(
+            ScreenSpacePoint {500, 100},
+            100, 100,
+            Resources::CharacterTextures[4].get())
+            );
+        mUIObjects.push_back(std::make_unique<UIObject>(
+            ScreenSpacePoint {600, 100},
+            100, 100,
+            Resources::CharacterTextures[5].get())
             );
 
         /* player body */
         mUIObjects.push_back(std::make_unique<UIObject>(
-            ScreenSpacePoint {1200, 200},
-            550, 500,
+            ScreenSpacePoint {630, 520},
+            300, 300,
             Resources::RegularTextures["playerTex"].get())
             );
 
         /* crosshairs */
         mUIObjects.push_back(std::make_unique<UIObject>(
-            ScreenSpacePoint {800, 620},
-            70, 70,
+            ScreenSpacePoint {400, 300},
+            30, 30,
             Resources::RegularTextures["crosshairsTex"].get())
             );
         
