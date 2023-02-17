@@ -47,3 +47,8 @@ ScreenSpacePoint Button::GetMaxCorner()
     };
 }
 
+void Button::SetShouldDraw(bool newValue)
+{
+    mUIObject->shouldDraw = newValue;
+}
+

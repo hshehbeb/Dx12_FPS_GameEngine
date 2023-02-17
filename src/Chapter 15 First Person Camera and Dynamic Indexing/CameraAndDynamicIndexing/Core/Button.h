@@ -19,6 +19,7 @@ public:
     // todo: should pull up
     ScreenSpacePoint GetMinCorner();
     ScreenSpacePoint GetMaxCorner();
+    void SetShouldDraw(bool newValue);
 
 private:
     ScreenSpacePoint mPos;

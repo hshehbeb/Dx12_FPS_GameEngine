@@ -87,6 +87,7 @@ private:
 	void UpdateMaterialBuffer(const GameTimer& gt);
 	void UpdateMainPassCB(const GameTimer& gt);
 
+    void InitButtons();
 	void LoadTextures();
     void BuildRootSignature();
 	void BuildDescriptorHeaps();
@@ -173,6 +174,23 @@ CameraAndDynamicIndexingApp::~CameraAndDynamicIndexingApp()
         FlushCommandQueue();
 }
 
+void CameraAndDynamicIndexingApp::InitButtons()
+{
+    mButtons.push_back(std::make_unique<Button>(
+        ScreenSpacePoint {100, 500}, 100, 50,
+        Resources::RegularTextures["PauseGame"].get())
+        );
+    mButtons.push_back(std::make_unique<Button>(
+        ScreenSpacePoint {400, 300}, 100, 50,
+        Resources::RegularTextures["ContinueGame"].get())
+        );
+    
+    for (auto& btn : mButtons)
+    {
+        btn->Initialize(mUIObjs.get());
+    }
+}
+
 bool CameraAndDynamicIndexingApp::Initialize()
 {
     Log::Debug("====== starting brand new game session ======");
@@ -203,15 +221,7 @@ bool CameraAndDynamicIndexingApp::Initialize()
         md3dDevice.Get(), mAxisIndicator.get()
         );
 
-    mButtons.push_back(std::make_unique<Button>(
-        ScreenSpacePoint {100, 500},
-        50, 50,
-        Resources::RegularTextures["crateTex"].get())
-        );
-    for (auto& btn : mButtons)
-    {
-        btn->Initialize(mUIObjs.get());
-    }
+    InitButtons();
     
     mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
     
@@ -561,10 +571,13 @@ void CameraAndDynamicIndexingApp::LoadTextures()
 
     auto crosshairsTex = std::make_unique<Texture>();
     crosshairsTex->Name = "crosshairsTex";
-    crosshairsTex->Filename = L"../../Textures/T_Crosshairs.dds";
+    crosshairsTex->Filename = TEXT("../../Textures/T_Crosshairs.dds");
     ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
         mCommandList.Get(), crosshairsTex->Filename.c_str(),
         crosshairsTex->Resource, crosshairsTex->UploadHeap));
+
+    LoadTexture(PauseGame);
+    LoadTexture(ContinueGame);
 
 	Resources::RegularTextures[bricksTex->Name] = std::move(bricksTex);
 	Resources::RegularTextures[stoneTex->Name] = std::move(stoneTex);
