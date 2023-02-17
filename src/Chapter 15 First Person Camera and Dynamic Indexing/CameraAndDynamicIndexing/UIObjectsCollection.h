@@ -18,8 +18,8 @@ public:
         mAxisIndicator = axisIndicator;
         
         mUIObjects.push_back(std::make_unique<UIObject>(
-            ScreenSpacePoint {200, 200},
-            100, 100,
+            ScreenSpacePoint {0, 0},
+            30, 30,
             Resources::CharacterTextures[0].get())
             );
         mUIObjects.push_back(std::make_unique<UIObject>(

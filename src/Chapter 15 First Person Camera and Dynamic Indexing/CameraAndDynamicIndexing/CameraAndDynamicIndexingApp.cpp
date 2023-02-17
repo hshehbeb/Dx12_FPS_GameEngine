@@ -133,7 +133,7 @@ private:
     // std::unique_ptr<UIObject> mUIObj = nullptr;
     std::unique_ptr<UIObjectsCollection> mUIObjs;
     std::unique_ptr<AxisIndicator> mAxisIndicator;
-    std::unique_ptr<Button> mSampleBtn;
+    std::vector<std::unique_ptr<Button>> mButtons;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -203,12 +203,15 @@ bool CameraAndDynamicIndexingApp::Initialize()
         md3dDevice.Get(), mAxisIndicator.get()
         );
 
-    mSampleBtn = std::make_unique<Button>(
-        ScreenSpacePoint {400, 300},
-        70, 70,
-        Resources::RegularTextures["crateTex"].get()
+    mButtons.push_back(std::make_unique<Button>(
+        ScreenSpacePoint {800, 600},
+        20, 20,
+        Resources::RegularTextures["crateTex"].get())
         );
-    mSampleBtn->Initialize(mUIObjs.get());
+    for (auto& btn : mButtons)
+    {
+        btn->Initialize(mUIObjs.get());
+    }
     
     mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
     
@@ -355,6 +358,13 @@ void CameraAndDynamicIndexingApp::OnMouseDown(WPARAM btnState, int x, int y)
     mLastMousePos.y = y;
 
     SetCapture(mhMainWnd);
+
+    ScreenSpacePoint clickPos = {x, y};
+    for (auto& btn : mButtons)
+    {
+        if (btn->CheckIfClicked(clickPos))
+            btn->HandleOnClick();
+    }
 }
 
 void CameraAndDynamicIndexingApp::OnMouseUp(WPARAM btnState, int x, int y)

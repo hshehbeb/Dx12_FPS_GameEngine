@@ -13,6 +13,12 @@ public:
     explicit Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture);
 
     void Initialize(UIObjectsCollection* uiObjsCollection);
+    bool CheckIfClicked(const ScreenSpacePoint& clickPos);
+    virtual void HandleOnClick();
+
+    // todo: should pull up
+    ScreenSpacePoint GetMinCorner();
+    ScreenSpacePoint GetMaxCorner();
 
 private:
     ScreenSpacePoint mPos;
