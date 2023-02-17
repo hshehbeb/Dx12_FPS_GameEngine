@@ -9,6 +9,8 @@
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
 #include "UIObjectsCollection.h"
+#include "Core/Button.h"
+#include "Core/Log.h"
 #include "Core/Actors/Actor.h"
 #include "Core/Components/GravitySimulator.h"
 #include "Core/Components/PlayerMovement.h"
@@ -131,6 +133,7 @@ private:
     // std::unique_ptr<UIObject> mUIObj = nullptr;
     std::unique_ptr<UIObjectsCollection> mUIObjs;
     std::unique_ptr<AxisIndicator> mAxisIndicator;
+    std::unique_ptr<Button> mSampleBtn;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -172,6 +175,8 @@ CameraAndDynamicIndexingApp::~CameraAndDynamicIndexingApp()
 
 bool CameraAndDynamicIndexingApp::Initialize()
 {
+    Log::Debug("====== starting brand new game session ======");
+    
     if(!D3DApp::Initialize())
         return false;
 
@@ -198,10 +203,12 @@ bool CameraAndDynamicIndexingApp::Initialize()
         md3dDevice.Get(), mAxisIndicator.get()
         );
 
-    mUIObjs->Add(std::make_shared<UIObject>(
-        ScreenSpacePoint {50, 50}, 50, 50,
-        Resources::RegularTextures["crosshairsTex"].get())
+    mSampleBtn = std::make_unique<Button>(
+        ScreenSpacePoint {400, 300},
+        70, 70,
+        Resources::RegularTextures["crateTex"].get()
         );
+    mSampleBtn->Initialize(mUIObjs.get());
     
     mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
     

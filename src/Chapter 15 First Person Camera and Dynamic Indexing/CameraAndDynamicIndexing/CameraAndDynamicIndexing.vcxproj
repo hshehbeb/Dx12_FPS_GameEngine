@@ -207,6 +207,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Core\Button.cpp" />
     <ClCompile Include="Core\Components\PlayerMovement.cpp" />
     <ClCompile Include="Core\Components\GravitySimulator.cpp" />
     <ClCompile Include="Core\UIWidgets\AxisIndicator.cpp">
@@ -337,6 +338,7 @@
     <ClInclude Include="..\..\Common\MathHelper.h" />
     <ClInclude Include="..\..\Common\UploadBuffer.h" />
     <ClInclude Include="Core\Actors\Actor.h" />
+    <ClInclude Include="Core\Button.h" />
     <ClInclude Include="Core\Components\IComponent.h" />
     <ClInclude Include="Core\Components\PlayerMovement.h" />
     <ClInclude Include="Core\Components\GravitySimulator.h" />
