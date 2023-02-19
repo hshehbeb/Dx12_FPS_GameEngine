@@ -4,12 +4,12 @@
 
 void UIObjectsCollection::Add(std::shared_ptr<UIObject> uiObj)
 {
-    mUIObjects.push_back(uiObj);
+    mUIObjectsRegistry.Add(uiObj);
 }
 
 void UIObjectsCollection::InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
-    for (const auto& uiObj : mUIObjects)
+    for (auto& uiObj : mUIObjectsRegistry.GetValues())
         uiObj->Initialize(*device, *cmdList);
 
     mAxisIndicator->Initailize(*device, *cmdList);
@@ -17,7 +17,7 @@ void UIObjectsCollection::InitAll(ID3D12Device* device, ID3D12GraphicsCommandLis
 
 void UIObjectsCollection::UpdateAll()
 {
-    for (const auto& uiObj : mUIObjects)
+    for (auto& uiObj : mUIObjectsRegistry.GetValues())
         uiObj->Update();
 
     mAxisIndicator->Update();
@@ -28,7 +28,7 @@ void UIObjectsCollection::DrawAll(ID3D12GraphicsCommandList* cmdList)
     cmdList->SetPipelineState(mPSOs["std_ui"].Get());
     cmdList->SetGraphicsRootSignature(mRootSignatures["std_ui"].Get());
     
-    for (const auto& uiObj : mUIObjects)
+    for (auto& uiObj : mUIObjectsRegistry.GetValues())
         uiObj->Draw(cmdList);
 
     mAxisIndicator->Draw(cmdList);

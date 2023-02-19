@@ -3,6 +3,7 @@
 #include "Core/UIWidgets/UIObject.h"
 #include "DataStructures/ScreenSpacePoint.h"
 #include "Resources.h"
+#include "DataStructures/EfficientLookup.h"
 
 // namespace Resources
 // {
@@ -17,46 +18,46 @@ public:
     {
         mAxisIndicator = axisIndicator;
         
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {100, 100},
             100, 100,
             Resources::CharacterTextures[0].get())
             );
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {200, 100},
             100, 100,
             Resources::CharacterTextures[1].get())
             );
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {300, 100},
             100, 100,
             Resources::CharacterTextures[2].get())
             );
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {400, 100},
             100, 100,
             Resources::CharacterTextures[3].get())
             );
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {500, 100},
             100, 100,
             Resources::CharacterTextures[4].get())
             );
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {600, 100},
             100, 100,
             Resources::CharacterTextures[5].get())
             );
 
         /* player body */
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {630, 520},
             300, 300,
             Resources::RegularTextures["playerTex"].get())
             );
 
         /* crosshairs */
-        mUIObjects.push_back(std::make_unique<UIObject>(
+        mUIObjectsRegistry.Add(std::make_unique<UIObject>(
             ScreenSpacePoint {400, 300},
             30, 30,
             Resources::RegularTextures["crosshairsTex"].get())
@@ -73,14 +74,13 @@ public:
     void DrawAll(ID3D12GraphicsCommandList* cmdList);
 
 private:
-    typedef std::unordered_map<std::string, std::shared_ptr<UIObject>> t_UIObjectsRegistry;
-    typedef std::vector<std::shared_ptr<UIObject>> t_UIObjectsList;
+    typedef EfficientLookup<std::shared_ptr<UIObject>> t_UIObjectsRegistry;
     typedef std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> t_PSOsRegistry;
     typedef std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> t_ShaderRegistry; 
     typedef std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12RootSignature>> t_RootSignatureRegistry; 
 
 private:
-    t_UIObjectsList mUIObjects;
+    t_UIObjectsRegistry mUIObjectsRegistry;
     t_PSOsRegistry mPSOs;
     t_ShaderRegistry mShaders;
     t_RootSignatureRegistry mRootSignatures;

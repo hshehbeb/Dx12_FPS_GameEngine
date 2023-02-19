@@ -345,6 +345,7 @@
     <ClInclude Include="Core\Log.h" />
     <ClInclude Include="Core\UIWidgets\AxisIndicator.h" />
     <ClInclude Include="Core\UIWidgets\UIObject.h" />
+    <ClInclude Include="DataStructures\EfficientLookup.h" />
     <ClInclude Include="DataStructures\Rotation.h" />
     <ClInclude Include="DataStructures\ScreenSpacePoint.h" />
     <ClInclude Include="DataStructures\Vertex.h" />

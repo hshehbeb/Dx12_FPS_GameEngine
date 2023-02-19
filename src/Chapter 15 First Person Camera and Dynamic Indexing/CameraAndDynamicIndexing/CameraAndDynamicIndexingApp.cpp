@@ -15,6 +15,7 @@
 #include "Core/Components/GravitySimulator.h"
 #include "Core/Components/PlayerMovement.h"
 #include "Core/UIWidgets/AxisIndicator.h"
+#include "DataStructures/EfficientLookup.h"
 #include "DataStructures/ScreenSpacePoint.h"
 
 using Microsoft::WRL::ComPtr;
@@ -134,7 +135,7 @@ private:
     // std::unique_ptr<UIObject> mUIObj = nullptr;
     std::unique_ptr<UIObjectsCollection> mUIObjs;
     std::unique_ptr<AxisIndicator> mAxisIndicator;
-    std::vector<std::unique_ptr<Button>> mButtons;
+    EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -176,16 +177,16 @@ CameraAndDynamicIndexingApp::~CameraAndDynamicIndexingApp()
 
 void CameraAndDynamicIndexingApp::InitButtons()
 {
-    mButtons.push_back(std::make_unique<Button>(
+    mButtonsRegistry.Add("btn_PauseGame", std::make_shared<Button>(
         ScreenSpacePoint {100, 500}, 100, 50,
         Resources::RegularTextures["PauseGame"].get())
         );
-    mButtons.push_back(std::make_unique<Button>(
+    mButtonsRegistry.Add("btn_ContinueGame", std::make_shared<Button>(
         ScreenSpacePoint {400, 300}, 100, 50,
         Resources::RegularTextures["ContinueGame"].get())
         );
     
-    for (auto& btn : mButtons)
+    for (auto& btn : mButtonsRegistry.GetValues())
     {
         btn->Initialize(mUIObjs.get());
     }
@@ -370,7 +371,7 @@ void CameraAndDynamicIndexingApp::OnMouseDown(WPARAM btnState, int x, int y)
     SetCapture(mhMainWnd);
 
     ScreenSpacePoint clickPos = {x, y};
-    for (auto& btn : mButtons)
+    for (auto& btn : mButtonsRegistry.GetValues())
     {
         if (btn->CheckIfClicked(clickPos))
             btn->HandleOnClick();
