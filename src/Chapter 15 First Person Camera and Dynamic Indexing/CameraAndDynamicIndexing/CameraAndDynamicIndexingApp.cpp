@@ -182,12 +182,20 @@ void CameraAndDynamicIndexingApp::InitButtons()
 {
     mButtonsRegistry.Add("btn_PauseGame", std::make_shared<Button>(
         ScreenSpacePoint {100, 500}, 100, 50,
-        Resources::RegularTextures["PauseGame"].get())
-        );
+        Resources::RegularTextures["PauseGame"].get(),
+        [&](ScreenSpacePoint p){
+            mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(true);
+            mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(false);
+        })
+    );
     mButtonsRegistry.Add("btn_ContinueGame", std::make_shared<Button>(
         ScreenSpacePoint {400, 300}, 100, 50,
-        Resources::RegularTextures["ContinueGame"].get())
-        );
+        Resources::RegularTextures["ContinueGame"].get(),
+        [&](ScreenSpacePoint p){
+            mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
+            mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(true);
+        })
+    );
 
     mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
     
@@ -430,7 +438,7 @@ void CameraAndDynamicIndexingApp::OnMouseDown(WPARAM btnState, int x, int y)
     for (auto& btn : mButtonsRegistry.GetValues())
     {
         if (btn->CheckIfClicked(clickPos))
-            btn->HandleOnClick();
+            btn->HandleOnClick(clickPos);
     }
 }
 

@@ -2,18 +2,20 @@
 
 #include "Log.h"
 
-Button::Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture)
-    : mPos(atPos)
-    , mWidth(width)
-    , mHeight(height)
-{
-    image = std::make_shared<Image>(mPos, width, height, pTexture);
-}
-
 // void Button::Initialize(UIObjectsCollection* uiObjsCollection)
 // {
 //     uiObjsCollection->Add(mUIObject);
 // }
+
+Button::Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture,
+    std::function<void(ScreenSpacePoint)>&& onClickHandle)
+    : mPos(atPos)
+    , mWidth(width)
+    , mHeight(height)
+    , mOnClickHandle(onClickHandle)
+{
+    image = std::make_shared<Image>(mPos, width, height, pTexture);
+}
 
 bool Button::CheckIfClicked(const ScreenSpacePoint& clickPos)
 {
@@ -26,9 +28,9 @@ bool Button::CheckIfClicked(const ScreenSpacePoint& clickPos)
            && clickPos.y <= maxCorner.y;
 }
 
-void Button::HandleOnClick()
+void Button::HandleOnClick(ScreenSpacePoint clickPos)
 {
-    Log::Debug("detected a click, further behaviours should be specified in child class");
+    mOnClickHandle(clickPos);
 }
 
 ScreenSpacePoint Button::GetMinCorner()
