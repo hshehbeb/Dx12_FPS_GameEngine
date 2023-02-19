@@ -10,7 +10,7 @@
 
 struct MeshGeometry;
 
-class UIObject
+class Image
 {
     struct ConstantBuffer { DirectX::XMFLOAT4X4 MVPMatrix = MathHelper::Identity4x4(); };
     
@@ -21,7 +21,7 @@ public:
     int height;
 
 public:
-    explicit UIObject(ScreenSpacePoint position, int width, int height, Texture* pTexture);
+    explicit Image(ScreenSpacePoint position, int width, int height, Texture* pTexture);
 
     void Initialize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList);
     void Draw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList);

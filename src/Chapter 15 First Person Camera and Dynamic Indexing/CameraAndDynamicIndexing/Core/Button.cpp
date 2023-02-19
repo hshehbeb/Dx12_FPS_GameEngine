@@ -7,13 +7,13 @@ Button::Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture
     , mWidth(width)
     , mHeight(height)
 {
-    mUIObject = std::make_shared<UIObject>(mPos, width, height, pTexture);
+    image = std::make_shared<Image>(mPos, width, height, pTexture);
 }
 
-void Button::Initialize(UIObjectsCollection* uiObjsCollection)
-{
-    uiObjsCollection->Add(mUIObject);
-}
+// void Button::Initialize(UIObjectsCollection* uiObjsCollection)
+// {
+//     uiObjsCollection->Add(mUIObject);
+// }
 
 bool Button::CheckIfClicked(const ScreenSpacePoint& clickPos)
 {
@@ -49,6 +49,6 @@ ScreenSpacePoint Button::GetMaxCorner()
 
 void Button::SetShouldDraw(bool newValue)
 {
-    mUIObject->shouldDraw = newValue;
+    image->shouldDraw = newValue;
 }
 

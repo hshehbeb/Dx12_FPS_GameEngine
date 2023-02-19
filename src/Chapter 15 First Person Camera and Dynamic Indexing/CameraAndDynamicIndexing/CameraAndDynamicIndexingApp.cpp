@@ -8,7 +8,7 @@
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
-#include "UIObjectsCollection.h"
+#include "ImageBatch.h"
 #include "Core/Button.h"
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
@@ -89,7 +89,8 @@ private:
 	void UpdateMainPassCB(const GameTimer& gt);
 
     void InitButtons();
-	void LoadTextures();
+    void InitImages();
+    void LoadTextures();
     void BuildRootSignature();
 	void BuildDescriptorHeaps();
     void BuildShadersAndInputLayout();
@@ -133,9 +134,11 @@ private:
 	Camera mCamera;
 
     // std::unique_ptr<UIObject> mUIObj = nullptr;
-    std::unique_ptr<UIObjectsCollection> mUIObjs;
     std::unique_ptr<AxisIndicator> mAxisIndicator;
+    std::unique_ptr<ImageBatch> mImageBatch;
+    
     EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
+    EfficientLookup<std::shared_ptr<Image>>  mImagesRegistry;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -185,11 +188,62 @@ void CameraAndDynamicIndexingApp::InitButtons()
         ScreenSpacePoint {400, 300}, 100, 50,
         Resources::RegularTextures["ContinueGame"].get())
         );
+
+    mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
     
     for (auto& btn : mButtonsRegistry.GetValues())
     {
-        btn->Initialize(mUIObjs.get());
+        mImagesRegistry.Add(btn->image);
     }
+}
+
+void CameraAndDynamicIndexingApp::InitImages()
+{
+    /* start up characters */
+    mImagesRegistry.Add(std::make_shared<Image>(
+            ScreenSpacePoint {100, 100},
+            100, 100,
+            Resources::CharacterTextures[0].get())
+            );
+    mImagesRegistry.Add(std::make_shared<Image>(
+        ScreenSpacePoint {200, 100},
+        100, 100,
+        Resources::CharacterTextures[1].get())
+        );
+    mImagesRegistry.Add(std::make_shared<Image>(
+        ScreenSpacePoint {300, 100},
+        100, 100,
+        Resources::CharacterTextures[2].get())
+        );
+    mImagesRegistry.Add(std::make_shared<Image>(
+        ScreenSpacePoint {400, 100},
+        100, 100,
+        Resources::CharacterTextures[3].get())
+        );
+    mImagesRegistry.Add(std::make_shared<Image>(
+        ScreenSpacePoint {500, 100},
+        100, 100,
+        Resources::CharacterTextures[4].get())
+        );
+    mImagesRegistry.Add(std::make_shared<Image>(
+        ScreenSpacePoint {600, 100},
+        100, 100,
+        Resources::CharacterTextures[5].get())
+        );
+
+    /* player body */
+    mImagesRegistry.Add(std::make_shared<Image>(
+        ScreenSpacePoint {630, 520},
+        300, 300,
+        Resources::RegularTextures["playerTex"].get())
+        );
+
+    /* crosshairs */
+    mImagesRegistry.Add(std::make_shared<Image>(
+        ScreenSpacePoint {400, 300},
+        30, 30,
+        Resources::RegularTextures["crosshairsTex"].get())
+        );
 }
 
 bool CameraAndDynamicIndexingApp::Initialize()
@@ -215,16 +269,18 @@ bool CameraAndDynamicIndexingApp::Initialize()
     );
     
 	LoadTextures();
-
+    
     mAxisIndicator = std::make_unique<AxisIndicator>(
-        ScreenSpacePoint {100, 100}, 50, 50, &mCamera);
-    mUIObjs = std::make_unique<UIObjectsCollection>(
-        md3dDevice.Get(), mAxisIndicator.get()
+        ScreenSpacePoint {100, 100}, 50, 50, &mCamera
         );
-
+    
+    InitImages();
     InitButtons();
     
-    mUIObjs->InitAll(md3dDevice.Get(), mCommandList.Get());
+    mImageBatch = std::make_unique<ImageBatch>(
+        md3dDevice.Get(), mAxisIndicator.get(), mImagesRegistry
+        );
+    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
  
     BuildRootSignature();
@@ -261,7 +317,7 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
     OnKeyboardInput(gt);
     
     // mPlayer->Update();
-    mUIObjs->UpdateAll();
+    mImageBatch->UpdateAll();
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -336,7 +392,7 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
 	Draw3dObjects();
     
     // mCommandList->SetPipelineState(mPSOs["ui"].Get());
-    mUIObjs->DrawAll(mCommandList.Get());
+    mImageBatch->DrawAll(mCommandList.Get());
     // mUIObj->Draw(mCommandList);
     
     // Indicate a state transition on the resource usage.

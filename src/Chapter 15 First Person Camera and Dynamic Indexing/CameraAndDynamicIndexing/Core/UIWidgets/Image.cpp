@@ -1,6 +1,6 @@
 ﻿#include <D3Dcompiler.h>
 
-#include "UIObject.h"
+#include "Image.h"
 #include "../../../../Common/DDSTextureLoader.h"
 #include "../../../../Common/d3dApp.h"
 #include "../../../../Common/d3dUtil.h"
@@ -8,7 +8,7 @@
 
 struct Vertex;
 
-UIObject::UIObject(ScreenSpacePoint position, int width, int height, Texture* pTexture)
+Image::Image(ScreenSpacePoint position, int width, int height, Texture* pTexture)
     : shouldDraw(true)
     , position(position)
     , width(width)
@@ -17,7 +17,7 @@ UIObject::UIObject(ScreenSpacePoint position, int width, int height, Texture* pT
 {
 }
 
-void UIObject::Initialize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
+void Image::Initialize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
 {
     // LoadTexture(&device, &cmdList);
     BuildDescriptorHeap(device);
@@ -25,7 +25,7 @@ void UIObject::Initialize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdLi
     BuildQuadGeometry(device, cmdList);
 }
 
-DirectX::XMFLOAT4X4 UIObject::CalculateMVPMatrix() const
+DirectX::XMFLOAT4X4 Image::CalculateMVPMatrix() const
 {
     float W = D3DApp::GetApp()->mClientWidth;
     float H = D3DApp::GetApp()->mClientHeight;
@@ -45,7 +45,7 @@ DirectX::XMFLOAT4X4 UIObject::CalculateMVPMatrix() const
     };
 }
 
-void UIObject::BuildDescriptorHeap(ID3D12Device& device)
+void Image::BuildDescriptorHeap(ID3D12Device& device)
 {
     // constant buffer containing vertices info
     D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
@@ -78,7 +78,7 @@ void UIObject::BuildDescriptorHeap(ID3D12Device& device)
     device.CreateShaderResourceView(mTexture->Resource.Get(), &srvDesc, hDescriptor);
 }
 
-void UIObject::BuildConstantBuffer(ID3D12Device& device)
+void Image::BuildConstantBuffer(ID3D12Device& device)
 {
     mConstantBuffer = std::make_unique<UploadBuffer<ConstantBuffer>>(
         &device, 1, true);
@@ -99,7 +99,7 @@ void UIObject::BuildConstantBuffer(ID3D12Device& device)
         mCbvHeap->GetCPUDescriptorHandleForHeapStart());
 }
 
-void UIObject::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
+void Image::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
 {
     DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(DirectX::Colors::White);
     std::array<Vertex, 4> vertices =
@@ -149,7 +149,7 @@ void UIObject::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList
     mQuadGeom->DrawArgs["quad"] = submesh;
 }
 
-void UIObject::Draw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList)
+void Image::Draw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList)
 {
     if (!shouldDraw)
     {
@@ -172,7 +172,7 @@ void UIObject::Draw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList)
         1, 0, 0, 0);
 }
 
-void UIObject::Update()
+void Image::Update()
 {
     // Convert Spherical to Cartesian coordinates.
     // float x = mRadius*sinf(mPhi)*cosf(mTheta);

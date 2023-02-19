@@ -1,40 +1,40 @@
-﻿#include "UIObjectsCollection.h"
+﻿#include "ImageBatch.h"
 
 #include "../../Common/d3dApp.h"
 
-void UIObjectsCollection::Add(std::shared_ptr<UIObject> uiObj)
+void ImageBatch::Add(std::shared_ptr<Image> uiObj)
 {
-    mUIObjectsRegistry.Add(uiObj);
+    mImages.Add(uiObj);
 }
 
-void UIObjectsCollection::InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+void ImageBatch::InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
-    for (auto& uiObj : mUIObjectsRegistry.GetValues())
+    for (auto& uiObj : mImages.GetValues())
         uiObj->Initialize(*device, *cmdList);
 
     mAxisIndicator->Initailize(*device, *cmdList);
 }
 
-void UIObjectsCollection::UpdateAll()
+void ImageBatch::UpdateAll()
 {
-    for (auto& uiObj : mUIObjectsRegistry.GetValues())
+    for (auto& uiObj : mImages.GetValues())
         uiObj->Update();
 
     mAxisIndicator->Update();
 }
 
-void UIObjectsCollection::DrawAll(ID3D12GraphicsCommandList* cmdList)
+void ImageBatch::DrawAll(ID3D12GraphicsCommandList* cmdList)
 {
     cmdList->SetPipelineState(mPSOs["std_ui"].Get());
     cmdList->SetGraphicsRootSignature(mRootSignatures["std_ui"].Get());
     
-    for (auto& uiObj : mUIObjectsRegistry.GetValues())
+    for (auto& uiObj : mImages.GetValues())
         uiObj->Draw(cmdList);
 
     mAxisIndicator->Draw(cmdList);
 }
 
-UIObjectsCollection::t_PSOsRegistry UIObjectsCollection::BuildPSOs(ID3D12Device* device)
+ImageBatch::t_PSOsRegistry ImageBatch::BuildPSOs(ID3D12Device* device)
 {
     t_PSOsRegistry result {};
 
@@ -43,7 +43,7 @@ UIObjectsCollection::t_PSOsRegistry UIObjectsCollection::BuildPSOs(ID3D12Device*
     return result;
 }
 
-void UIObjectsCollection::BuildPSO(
+void ImageBatch::BuildPSO(
     ID3D12Device* device,
     IN std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout,
     IN ID3D12RootSignature* pRootSignature,
@@ -76,7 +76,7 @@ void UIObjectsCollection::BuildPSO(
     );
 }
 
-void UIObjectsCollection::BuildStdUiPSO(
+void ImageBatch::BuildStdUiPSO(
     IN ID3D12Device* device,
     OUT Microsoft::WRL::ComPtr<ID3D12PipelineState>& resultPSO)
     
@@ -102,7 +102,7 @@ void UIObjectsCollection::BuildStdUiPSO(
     );
 }
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> UIObjectsCollection::StdUiInputLayout()
+std::vector<D3D12_INPUT_ELEMENT_DESC> ImageBatch::StdUiInputLayout()
 {
     const D3D_SHADER_MACRO alphaTestDefines[] =
     {
@@ -117,13 +117,13 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> UIObjectsCollection::StdUiInputLayout()
     };
 }
 
-void UIObjectsCollection::CompileStdShaders()
+void ImageBatch::CompileStdShaders()
 {
     mShaders["std_ui_VS"] = d3dUtil::CompileShader(L"Shaders\\vet_renderer2d.hlsl", nullptr, "main", "vs_5_0");
     mShaders["std_ui_PS"] = d3dUtil::CompileShader(L"Shaders\\pxl_renderer2d.hlsl", nullptr, "main", "ps_5_0");
 }
 
-void UIObjectsCollection::BuildStdRootSignature(ID3D12Device& device)
+void ImageBatch::BuildStdRootSignature(ID3D12Device& device)
 {
     CD3DX12_ROOT_PARAMETER slotRootParameter[2];
     
@@ -163,7 +163,7 @@ void UIObjectsCollection::BuildStdRootSignature(ID3D12Device& device)
         IID_PPV_ARGS(&mRootSignatures["std_ui"])));
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> UIObjectsCollection::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> ImageBatch::GetStaticSamplers()
 {
     // Applications usually only need a handful of samplers.  So just define them all up front
 	// and keep them available as part of the root signature.  
