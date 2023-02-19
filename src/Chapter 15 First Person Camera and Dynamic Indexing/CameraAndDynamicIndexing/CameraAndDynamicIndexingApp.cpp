@@ -279,7 +279,7 @@ bool CameraAndDynamicIndexingApp::Initialize()
 	LoadTextures();
     
     mAxisIndicator = std::make_unique<AxisIndicator>(
-        ScreenSpacePoint {100, 100}, 50, 50, &mCamera
+        ScreenSpacePoint {70, 550}, 50, 50, &mCamera
         );
     
     InitImages();

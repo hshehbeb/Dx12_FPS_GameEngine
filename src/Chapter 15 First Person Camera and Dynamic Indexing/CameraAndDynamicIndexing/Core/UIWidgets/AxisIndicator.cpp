@@ -143,10 +143,10 @@ DirectX::XMFLOAT4X4 AxisIndicator::CalculateMVPMatrix()
     float W = D3DApp::GetApp()->mClientWidth;
     float H = D3DApp::GetApp()->mClientHeight;
     
-    float a = Width / W;
-    float b = Position.x / W - 1;
-    float c = Height / H;
-    float d = Position.y / H - 1;
+    float a = Width * 2 / W;
+    float b = Position.x * 2 / W - 1;
+    float c = Height * 2 / H;
+    float d = -Position.y * 2 / H + 1;
     float z = 0.01f;
 
     auto moveMatr = DirectX::XMMATRIX
@@ -165,12 +165,4 @@ DirectX::XMFLOAT4X4 AxisIndicator::CalculateMVPMatrix()
     DirectX::XMStoreFloat4x4(&result, finalMatr);
     
     return result;
-
-    // return DirectX::XMFLOAT4X4
-    // {
-    //     a, 0, 0, 0,
-    //     0, c, 0, 0,
-    //     0, 0, 0, 0,
-    //     b, d, z, 1
-    // };
 }

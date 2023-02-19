@@ -27,11 +27,21 @@ void ImageBatch::DrawAll(ID3D12GraphicsCommandList* cmdList)
 {
     cmdList->SetPipelineState(mPSOs["std_ui"].Get());
     cmdList->SetGraphicsRootSignature(mRootSignatures["std_ui"].Get());
+
+    /*
+     * why should mAxisIndicator being drawn before ?
+     *
+     * the rootSignature has 2 args, 1 for cbv and 1 for srv.
+     * this class only fill the cbv and leaves the srv referencing
+     * a stale place.
+     * in pixel shader, we will sample the texture in srv according to uv,
+     * likely we sampled an alpha value.
+     * and cause this class simply not passing the ALPHA_TEST.
+     */
+    mAxisIndicator->Draw(cmdList);
     
     for (auto& uiObj : mImages.GetValues())
         uiObj->Draw(cmdList);
-
-    mAxisIndicator->Draw(cmdList);
 }
 
 ImageBatch::t_PSOsRegistry ImageBatch::BuildPSOs(ID3D12Device* device)
