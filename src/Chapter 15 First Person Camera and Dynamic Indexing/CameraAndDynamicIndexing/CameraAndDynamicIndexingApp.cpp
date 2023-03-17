@@ -69,7 +69,10 @@ private:
     void BuildPSOs();
     void BuildFrameResources();
     void BuildMaterials();
+    void BuildPlane();
+    void BuildNPCs();
     void BuildScene();
+    void BuildGrassLand();
     // void RegisterRenderItems(ModelRenderer3D* renderer);
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
@@ -115,7 +118,7 @@ private:
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
-    std::unique_ptr<Actor> mTestRenderer3D;
+    std::vector<std::unique_ptr<Actor>> mSceneActors;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
@@ -297,7 +300,11 @@ void CameraAndDynamicIndexingApp::OnResize()
 void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 {
     mPlayer2->Update();
-    mTestRenderer3D->Update();
+    
+    for (auto& sceneActor : mSceneActors)
+    {
+        sceneActor->Update();
+    }
     
     OnKeyboardInput(gt);
     
@@ -999,112 +1006,161 @@ void CameraAndDynamicIndexingApp::BuildMaterials()
 	mMaterials["crate0"] = std::move(crate0);
 }
 
-void CameraAndDynamicIndexingApp::BuildScene()
+void CameraAndDynamicIndexingApp::BuildPlane()
 {
-	auto boxRitem = std::make_unique<RenderItem>();
-	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, 1.0f, 0.0f));
-	XMStoreFloat4x4(&boxRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
-	// boxRitem->ObjCBIndex = mObjCBIndex++;
-	boxRitem->Mat = mMaterials["crate0"].get();
-	boxRitem->Geo = mGeometries["shapeGeo"].get();
-	boxRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
-	boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
-	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-	// mAllRitems.push_back(std::move(boxRitem));
-    mAllRenderItems.RegisterRenderItem(boxRitem);
-
     auto gridRitem = std::make_unique<RenderItem>();
-    gridRitem->World = MathHelper::Identity4x4();
-	XMStoreFloat4x4(&gridRitem->TexTransform, XMMatrixScaling(8.0f, 8.0f, 1.0f));
-	// gridRitem->ObjCBIndex = mObjCBIndex++;
-	gridRitem->Mat = mMaterials["tile0"].get();
-	gridRitem->Geo = mGeometries["shapeGeo"].get();
-	gridRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    XMStoreFloat4x4(
+        &gridRitem->World,
+        XMMatrixScaling(3.0f, 3.0f, 3.0f) * XMMatrixRotationX(0) * XMMatrixTranslation(0.0f, 0.0f, 0.0f)
+    );
+    XMStoreFloat4x4(&gridRitem->TexTransform, XMMatrixScaling(8.0f, 8.0f, 1.0f));
+    gridRitem->Mat = mMaterials["tile0"].get();
+    gridRitem->Geo = mGeometries["shapeGeo"].get();
+    gridRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
     gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
     gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
-	mAllRenderItems.RegisterRenderItem(gridRitem);
+    mAllRenderItems.RegisterRenderItem(gridRitem);
+}
 
-	XMMATRIX brickTexTransform = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	for(int i = 0; i < 5; ++i)
-	{
-		auto leftCylRitem = std::make_unique<RenderItem>();
-		auto rightCylRitem = std::make_unique<RenderItem>();
-		auto leftSphereRitem = std::make_unique<RenderItem>();
-		auto rightSphereRitem = std::make_unique<RenderItem>();
-
-		XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i*5.0f);
-		XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i*5.0f);
-
-		XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i*5.0f);
-		XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i*5.0f);
-
-		XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
-		XMStoreFloat4x4(&leftCylRitem->TexTransform, brickTexTransform);
-		// leftCylRitem->ObjCBIndex = mObjCBIndex++;
-		leftCylRitem->Mat = mMaterials["bricks0"].get();
-		leftCylRitem->Geo = mGeometries["shapeGeo"].get();
-		leftCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-		leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-		leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-
-		XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
-		XMStoreFloat4x4(&rightCylRitem->TexTransform, brickTexTransform);
-		// rightCylRitem->ObjCBIndex = mObjCBIndex++;
-		rightCylRitem->Mat = mMaterials["bricks0"].get();
-		rightCylRitem->Geo = mGeometries["shapeGeo"].get();
-		rightCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-		rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-		rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-
-		XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
-		leftSphereRitem->TexTransform = MathHelper::Identity4x4();
-		// leftSphereRitem->ObjCBIndex = mObjCBIndex++;
-		leftSphereRitem->Mat = mMaterials["stone0"].get();
-		leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
-		leftSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-		leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-		leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-
-		XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
-		rightSphereRitem->TexTransform = MathHelper::Identity4x4();
-		// rightSphereRitem->ObjCBIndex = mObjCBIndex++;
-		rightSphereRitem->Mat = mMaterials["stone0"].get();
-		rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
-		rightSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-		rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-		rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-
-		mAllRenderItems.RegisterRenderItem(leftCylRitem);
-		mAllRenderItems.RegisterRenderItem(rightCylRitem);
-		mAllRenderItems.RegisterRenderItem(leftSphereRitem);
-		mAllRenderItems.RegisterRenderItem(rightSphereRitem);
-	}
+void CameraAndDynamicIndexingApp::BuildNPCs()
+{
+    const float SCALE = 1;
     
-    mTestRenderer3D = std::make_unique<Actor>(
-        std::vector<std::shared_ptr<IComponent>> {
-            std::make_unique<ModelRenderer3D>("./Models/flower/flower.fbx",
-                mMaterials["bricks0"].get()),
-            std::make_shared<Transform>(
-                XMMatrixTranslation(10, 0, 10))
-        }
-    );
+    auto grass = std::make_unique<Actor>(
+           std::vector<std::shared_ptr<IComponent>> {
+               std::make_unique<ModelRenderer3D>("./Models/lu/lu.fbx",
+                   mMaterials["stone0"].get()),
+               std::make_shared<Transform>(
+                   XMMatrixTranslation(0, 0, 0),
+                   XMMatrixRotationX(MathHelper::Pi / 2),
+                   XMMatrixScaling(SCALE, SCALE, SCALE))
+           }
+       );
+    mSceneActors.push_back(std::move(grass));
+}
 
-    mTestRenderer3D->Initialize(
-        md3dDevice.Get(), mCommandList.Get(), mAllRenderItems
-        );
-        
-    // mTestRenderer3D->Initialize(
-    //     md3dDevice.Get(), mCommandList.Get(), mAllRenderItems
-    //     );
+void CameraAndDynamicIndexingApp::BuildScene()
+{
+	BuildNPCs();
+    BuildPlane();
+    BuildGrassLand();
+    
+    for (auto& sceneActor : mSceneActors)
+    {
+        sceneActor->Initialize(md3dDevice.Get(),
+            mCommandList.Get(), mAllRenderItems);
+    }
 
     for(auto& e : mAllRenderItems.Data)
-		mOpaqueRitems.push_back(e.get());
+    {
+        mOpaqueRitems.push_back(e.get());
+    }
+    
+	// XMMATRIX brickTexTransform = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	// for(int i = 0; i < 5; ++i)
+	// {
+	// 	auto leftCylRitem = std::make_unique<RenderItem>();
+	// 	auto rightCylRitem = std::make_unique<RenderItem>();
+	// 	auto leftSphereRitem = std::make_unique<RenderItem>();
+	// 	auto rightSphereRitem = std::make_unique<RenderItem>();
+	//
+	// 	XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i*5.0f);
+	// 	XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i*5.0f);
+	//
+	// 	XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i*5.0f);
+	// 	XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i*5.0f);
+	//
+	// 	XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
+	// 	XMStoreFloat4x4(&leftCylRitem->TexTransform, brickTexTransform);
+	// 	// leftCylRitem->ObjCBIndex = mObjCBIndex++;
+	// 	leftCylRitem->Mat = mMaterials["bricks0"].get();
+	// 	leftCylRitem->Geo = mGeometries["shapeGeo"].get();
+	// 	leftCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	// 	leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
+	// 	leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
+	// 	leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
+	//
+	// 	XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
+	// 	XMStoreFloat4x4(&rightCylRitem->TexTransform, brickTexTransform);
+	// 	// rightCylRitem->ObjCBIndex = mObjCBIndex++;
+	// 	rightCylRitem->Mat = mMaterials["bricks0"].get();
+	// 	rightCylRitem->Geo = mGeometries["shapeGeo"].get();
+	// 	rightCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	// 	rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
+	// 	rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
+	// 	rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
+	//
+	// 	XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
+	// 	leftSphereRitem->TexTransform = MathHelper::Identity4x4();
+	// 	// leftSphereRitem->ObjCBIndex = mObjCBIndex++;
+	// 	leftSphereRitem->Mat = mMaterials["stone0"].get();
+	// 	leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
+	// 	leftSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	// 	leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
+	// 	leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
+	// 	leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
+	//
+	// 	XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
+	// 	rightSphereRitem->TexTransform = MathHelper::Identity4x4();
+	// 	// rightSphereRitem->ObjCBIndex = mObjCBIndex++;
+	// 	rightSphereRitem->Mat = mMaterials["stone0"].get();
+	// 	rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
+	// 	rightSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	// 	rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
+	// 	rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
+	// 	rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
+	//
+	// 	mAllRenderItems.RegisterRenderItem(leftCylRitem);
+	// 	mAllRenderItems.RegisterRenderItem(rightCylRitem);
+	// 	mAllRenderItems.RegisterRenderItem(leftSphereRitem);
+	// 	mAllRenderItems.RegisterRenderItem(rightSphereRitem);
+	// }
+    
+    // auto flower = std::make_unique<Actor>(
+    //     std::vector<std::shared_ptr<IComponent>> {
+    //         std::make_unique<ModelRenderer3D>("./Models/flower/flower.fbx",
+    //             mMaterials["bricks0"].get()),
+    //         std::make_shared<Transform>(
+    //             XMMatrixTranslation(10, 0, 10))
+    //     }
+    // );
+    // mSceneActors.push_back(std::move(flower));
+}
+
+void CameraAndDynamicIndexingApp::BuildGrassLand()
+{
+    const int GRASS_DENSITY = 10, FLOWER_DENSITY = 3, VOLUME_SIZE = 20;
+
+    for (int i = 0; i < GRASS_DENSITY; i++)
+    {
+        auto grass = std::make_unique<Actor>(
+            std::vector<std::shared_ptr<IComponent>> {
+                std::make_unique<ModelRenderer3D>("./Models/grass/grass.fbx",
+                    mMaterials["stone0"].get()),
+                std::make_shared<Transform>(
+                    XMMatrixTranslation(rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f, 0, rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f),
+                    XMMatrixRotationX(MathHelper::Pi / 2),
+                    XMMatrixScaling(0.02, 0.02, 0.02))
+            }
+        );
+        mSceneActors.push_back(std::move(grass));
+    }
+
+    for (int i = 0; i < FLOWER_DENSITY; i++)
+    {
+        auto flower = std::make_unique<Actor>(
+            std::vector<std::shared_ptr<IComponent>> {
+                std::make_unique<ModelRenderer3D>("./Models/flower/flower.fbx",
+                    mMaterials["crate0"].get()),
+                std::make_shared<Transform>(
+                    XMMatrixTranslation(rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f, 0, rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f),
+                    XMMatrixRotationX(MathHelper::Pi / 2),
+                    XMMatrixScaling(0.4, 0.4, 0.4))
+            }
+        );
+        mSceneActors.push_back(std::move(flower));
+    }
 }
 
 void CameraAndDynamicIndexingApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)
