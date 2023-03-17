@@ -13,12 +13,12 @@
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
 #include "Core/Components/GravitySimulator.h"
+#include "Core/Components/ModelRenderer3D.h"
 #include "Core/Components/PlayerMovement.h"
-#include "Core/ModelLoading/GeoObject.h"
-#include "Core/ModelLoading/ModelRenderer3D.h"
 #include "Core/UIWidgets/AxisIndicator.h"
 #include "DataStructures/EfficientLookup.h"
 #include "DataStructures/RenderItem.h"
+#include "DataStructures/RenderItemsList.h"
 #include "DataStructures/ScreenSpacePoint.h"
 
 using Microsoft::WRL::ComPtr;
@@ -30,42 +30,6 @@ using namespace DirectX::PackedVector;
 
 const int gNumFrameResources = 3;
 
-// Lightweight structure stores parameters to draw a shape.  This will
-// vary from app-to-app.
-
-// struct RenderItem
-// {
-// 	RenderItem() = default;
-//     RenderItem(const RenderItem& rhs) = delete;
-//  
-//     // World matrix of the shape that describes the object's local space
-//     // relative to the world space, which defines the position, orientation,
-//     // and scale of the object in the world.
-//     XMFLOAT4X4 World = MathHelper::Identity4x4();
-//
-// 	XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
-//
-// 	// Dirty flag indicating the object data has changed and we need to update the constant buffer.
-// 	// Because we have an object cbuffer for each FrameResource, we have to apply the
-// 	// update to each FrameResource.  Thus, when we modify obect data we should set 
-// 	// NumFramesDirty = gNumFrameResources so that each frame resource gets the update.
-// 	int NumFramesDirty = gNumFrameResources;
-//
-// 	// Index into GPU constant buffer corresponding to the ObjectCB for this render item.
-// 	UINT ObjCBIndex = -1;
-//
-// 	Material* Mat = nullptr;
-// 	MeshGeometry* Geo = nullptr;
-//
-//     // Primitive topology.
-//     D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-//
-//     // DrawIndexedInstanced parameters.
-//     UINT IndexCount = 0;
-//     UINT StartIndexLocation = 0;
-//     int BaseVertexLocation = 0;
-// };
-
 class CameraAndDynamicIndexingApp : public D3DApp
 {
 public:
@@ -75,6 +39,8 @@ public:
     ~CameraAndDynamicIndexingApp();
 
     virtual bool Initialize()override;
+    
+    // void RegisterRenderItem(std::unique_ptr<RenderItem>&& theRenderItem);
 
 private:
     virtual void OnResize()override;
@@ -103,13 +69,12 @@ private:
     void BuildFrameResources();
     void BuildMaterials();
     void BuildScene();
-    void RegisterRenderItems(ModelRenderer3D* renderer);
+    // void RegisterRenderItems(ModelRenderer3D* renderer);
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
 	std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 
 private:
-
     std::vector<std::unique_ptr<FrameResource>> mFrameResources;
     FrameResource* mCurrFrameResource = nullptr;
     int mCurrFrameResourceIndex = 0;
@@ -128,13 +93,13 @@ private:
 
     std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
  
-	// List of all the render items.
-	std::vector<std::unique_ptr<RenderItem>> mAllRitems;
+	// std::vector<std::unique_ptr<RenderItem>> mAllRitems;
+    RenderItemsList mAllRenderItems {};
 
 	// Render items divided by PSO.
 	std::vector<RenderItem*> mOpaqueRitems;
 
-    int mObjCBIndex = 0;
+    // int mObjCBIndex = 0;
 
     PassConstants mMainPassCB;
     
@@ -522,7 +487,7 @@ void CameraAndDynamicIndexingApp::AnimateMaterials(const GameTimer& gt)
 void CameraAndDynamicIndexingApp::UpdateObjectCBs(const GameTimer& gt)
 {
 	auto currObjectCB = mCurrFrameResource->ObjectCB.get();
-	for(auto& e : mAllRitems)
+	for(auto& e : mAllRenderItems.Data)
 	{
 		// Only update the cbuffer data if the constants have changed.  
 		// This needs to be tracked per frame resource.
@@ -984,7 +949,7 @@ void CameraAndDynamicIndexingApp::BuildFrameResources()
         auto frameRes = std::make_unique<FrameResource>(
             md3dDevice.Get(),
             1,
-            (UINT) mAllRitems.size(),
+            (UINT) mAllRenderItems.Data.size(),
             (UINT) mMaterials.size()
             );
         mFrameResources.push_back(std::move(frameRes));
@@ -1036,26 +1001,27 @@ void CameraAndDynamicIndexingApp::BuildScene()
 	auto boxRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, 1.0f, 0.0f));
 	XMStoreFloat4x4(&boxRitem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
-	boxRitem->ObjCBIndex = mObjCBIndex++;
+	// boxRitem->ObjCBIndex = mObjCBIndex++;
 	boxRitem->Mat = mMaterials["crate0"].get();
 	boxRitem->Geo = mGeometries["shapeGeo"].get();
 	boxRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
 	boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
 	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-	mAllRitems.push_back(std::move(boxRitem));
+	// mAllRitems.push_back(std::move(boxRitem));
+    mAllRenderItems.RegisterRenderItem(boxRitem);
 
     auto gridRitem = std::make_unique<RenderItem>();
     gridRitem->World = MathHelper::Identity4x4();
 	XMStoreFloat4x4(&gridRitem->TexTransform, XMMatrixScaling(8.0f, 8.0f, 1.0f));
-	gridRitem->ObjCBIndex = mObjCBIndex++;
+	// gridRitem->ObjCBIndex = mObjCBIndex++;
 	gridRitem->Mat = mMaterials["tile0"].get();
 	gridRitem->Geo = mGeometries["shapeGeo"].get();
 	gridRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
     gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
     gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
-	mAllRitems.push_back(std::move(gridRitem));
+	mAllRenderItems.RegisterRenderItem(gridRitem);
 
 	XMMATRIX brickTexTransform = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	for(int i = 0; i < 5; ++i)
@@ -1073,7 +1039,7 @@ void CameraAndDynamicIndexingApp::BuildScene()
 
 		XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
 		XMStoreFloat4x4(&leftCylRitem->TexTransform, brickTexTransform);
-		leftCylRitem->ObjCBIndex = mObjCBIndex++;
+		// leftCylRitem->ObjCBIndex = mObjCBIndex++;
 		leftCylRitem->Mat = mMaterials["bricks0"].get();
 		leftCylRitem->Geo = mGeometries["shapeGeo"].get();
 		leftCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1083,7 +1049,7 @@ void CameraAndDynamicIndexingApp::BuildScene()
 
 		XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
 		XMStoreFloat4x4(&rightCylRitem->TexTransform, brickTexTransform);
-		rightCylRitem->ObjCBIndex = mObjCBIndex++;
+		// rightCylRitem->ObjCBIndex = mObjCBIndex++;
 		rightCylRitem->Mat = mMaterials["bricks0"].get();
 		rightCylRitem->Geo = mGeometries["shapeGeo"].get();
 		rightCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1093,7 +1059,7 @@ void CameraAndDynamicIndexingApp::BuildScene()
 
 		XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
 		leftSphereRitem->TexTransform = MathHelper::Identity4x4();
-		leftSphereRitem->ObjCBIndex = mObjCBIndex++;
+		// leftSphereRitem->ObjCBIndex = mObjCBIndex++;
 		leftSphereRitem->Mat = mMaterials["stone0"].get();
 		leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
 		leftSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1103,7 +1069,7 @@ void CameraAndDynamicIndexingApp::BuildScene()
 
 		XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
 		rightSphereRitem->TexTransform = MathHelper::Identity4x4();
-		rightSphereRitem->ObjCBIndex = mObjCBIndex++;
+		// rightSphereRitem->ObjCBIndex = mObjCBIndex++;
 		rightSphereRitem->Mat = mMaterials["stone0"].get();
 		rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
 		rightSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1111,34 +1077,22 @@ void CameraAndDynamicIndexingApp::BuildScene()
 		rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
 		rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
 
-		mAllRitems.push_back(std::move(leftCylRitem));
-		mAllRitems.push_back(std::move(rightCylRitem));
-		mAllRitems.push_back(std::move(leftSphereRitem));
-		mAllRitems.push_back(std::move(rightSphereRitem));
+		mAllRenderItems.RegisterRenderItem(leftCylRitem);
+		mAllRenderItems.RegisterRenderItem(rightCylRitem);
+		mAllRenderItems.RegisterRenderItem(leftSphereRitem);
+		mAllRenderItems.RegisterRenderItem(rightSphereRitem);
 	}
     
     auto renderer = new ModelRenderer3D(
         "./Models/flower/flower.fbx",
         mMaterials["bricks0"].get()
         );
-    renderer->LoadModel(md3dDevice.Get(), mCommandList.Get());
-    RegisterRenderItems(renderer);
+    renderer->Initialize(
+        md3dDevice.Get(), mCommandList.Get(), mAllRenderItems
+        );
 
-    // All the render items are opaque.
-	for(auto& e : mAllRitems)
+    for(auto& e : mAllRenderItems.Data)
 		mOpaqueRitems.push_back(e.get());
-}
-
-void CameraAndDynamicIndexingApp::RegisterRenderItems(ModelRenderer3D* renderer)
-{
-    auto renderItems
-        = std::move(renderer->BuildRenderItems());
-
-    for (auto& renderItem : renderItems)
-    {
-        renderItem->ObjCBIndex = mObjCBIndex++;
-        mAllRitems.push_back(std::move(renderItem));
-    }
 }
 
 void CameraAndDynamicIndexingApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)

@@ -58,6 +58,10 @@ void GravitySimulator::Update(Actor* owner)
     comp->MoveFree(translation);
 }
 
+void GravitySimulator::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList)
+{
+}
+
 bool GravitySimulator::IsGrounded(PlayerMovement* comp)
 {
     const float tolerance = 0.1f;

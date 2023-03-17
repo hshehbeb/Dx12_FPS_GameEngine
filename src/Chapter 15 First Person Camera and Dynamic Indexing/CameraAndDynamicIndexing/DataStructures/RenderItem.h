@@ -1,4 +1,12 @@
 ﻿#pragma once
+#include "DirectXCollision.h"
+#include "DirectXMath.h"
+#include "../Core/ModelLoading/GeoObject.h"
+
+namespace
+{
+    using namespace DirectX;
+}
 
 struct RenderItem
 {

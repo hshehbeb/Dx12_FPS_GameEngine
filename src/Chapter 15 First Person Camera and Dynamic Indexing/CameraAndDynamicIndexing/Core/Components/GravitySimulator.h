@@ -18,6 +18,8 @@ public:
     GravitySimulator(DirectX::XMFLOAT3 gravityDirection = DirectX::XMFLOAT3 {0, -1, 0}, float maximumSpeed = 1.0f);
     
     virtual void Update(Actor* owner) override;
+    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList) override;
+    
     bool IsGrounded(PlayerMovement* comp);
     void IgnoreSimulationForThisFrame();
 

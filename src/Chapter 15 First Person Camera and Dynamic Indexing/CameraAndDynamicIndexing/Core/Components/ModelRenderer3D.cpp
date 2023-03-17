@@ -6,11 +6,15 @@ ModelRenderer3D::ModelRenderer3D(std::string loadPath, Material* material)
 {
 }
 
-// void ModelRenderer3D::RegisterRenderItem(std::vector<RenderItem>& renderItems,
-//     ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
-// {
-//     LoadModel(device, cmdList);
-// }
+void ModelRenderer3D::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList)
+{
+    LoadModel(device, cmdList);
+
+    for (auto& renderItem : BuildRenderItems())
+    {
+        rItemsList.RegisterRenderItem(renderItem);
+    }
+}
 
 const std::string& ModelRenderer3D::GetModelName()
 {
@@ -21,6 +25,11 @@ void ModelRenderer3D::LoadModel(ID3D12Device* device, ID3D12GraphicsCommandList*
 {
     LoadFromDiskToMemory();
     LoadFromMemoryToGPU(device, cmdList);
+}
+
+void ModelRenderer3D::Update(Actor* owner)
+{
+    // do nothing
 }
 
 void ModelRenderer3D::LoadFromDiskToMemory()
@@ -84,7 +93,6 @@ std::vector<std::unique_ptr<RenderItem>> ModelRenderer3D::BuildRenderItems()
 
         XMStoreFloat4x4(&item->World, mGeoObject->GetWorld());
         item->TexTransform = mesh.material.MatTransform;
-        // item->ObjCBIndex = objCBIndex++;
 
         item->Mat = mMat.get();
         item->Obj = mGeoObject.get();
@@ -94,11 +102,7 @@ std::vector<std::unique_ptr<RenderItem>> ModelRenderer3D::BuildRenderItems()
         item->IndexCount = mesh.IndexCount;
         item->StartIndexLocation = mesh.StartIndexLocation;
         item->BaseVertexLocation = mesh.BaseVertexLocation;
-        // item->Bounds = item->Geo->DrawArgs[GetModelName()].Bounds;
         item->name = GetModelName() + std::to_string(rand());
-        // n++;
-        // mRitemsLayer[(int)layer].push_back(item.get());
-        // mAllRitems.push_back(std::move(item));
 
         renderItems.push_back(std::move(item));
     }
