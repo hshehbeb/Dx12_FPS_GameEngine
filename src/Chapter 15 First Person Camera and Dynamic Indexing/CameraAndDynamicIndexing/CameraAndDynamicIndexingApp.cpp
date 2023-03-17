@@ -15,6 +15,7 @@
 #include "Core/Components/GravitySimulator.h"
 #include "Core/Components/ModelRenderer3D.h"
 #include "Core/Components/PlayerMovement.h"
+#include "Core/Components/Transform.h"
 #include "Core/UIWidgets/AxisIndicator.h"
 #include "DataStructures/EfficientLookup.h"
 #include "DataStructures/RenderItem.h"
@@ -114,6 +115,7 @@ private:
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
+    std::unique_ptr<Actor> mTestRenderer3D;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
@@ -295,6 +297,7 @@ void CameraAndDynamicIndexingApp::OnResize()
 void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 {
     mPlayer2->Update();
+    mTestRenderer3D->Update();
     
     OnKeyboardInput(gt);
     
@@ -1083,13 +1086,22 @@ void CameraAndDynamicIndexingApp::BuildScene()
 		mAllRenderItems.RegisterRenderItem(rightSphereRitem);
 	}
     
-    auto renderer = new ModelRenderer3D(
-        "./Models/flower/flower.fbx",
-        mMaterials["bricks0"].get()
-        );
-    renderer->Initialize(
+    mTestRenderer3D = std::make_unique<Actor>(
+        std::vector<std::shared_ptr<IComponent>> {
+            std::make_unique<ModelRenderer3D>("./Models/flower/flower.fbx",
+                mMaterials["bricks0"].get()),
+            std::make_shared<Transform>(
+                XMMatrixTranslation(10, 0, 10))
+        }
+    );
+
+    mTestRenderer3D->Initialize(
         md3dDevice.Get(), mCommandList.Get(), mAllRenderItems
         );
+        
+    // mTestRenderer3D->Initialize(
+    //     md3dDevice.Get(), mCommandList.Get(), mAllRenderItems
+    //     );
 
     for(auto& e : mAllRenderItems.Data)
 		mOpaqueRitems.push_back(e.get());

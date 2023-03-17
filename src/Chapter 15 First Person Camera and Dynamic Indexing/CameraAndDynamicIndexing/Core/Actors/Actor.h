@@ -15,6 +15,8 @@ public:
     Actor(Actor&& other) = delete;
     ~Actor() = default;
 
+    void Initialize(ID3D12Device* device,
+        ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList);
     void Update();
     
     template <class T>

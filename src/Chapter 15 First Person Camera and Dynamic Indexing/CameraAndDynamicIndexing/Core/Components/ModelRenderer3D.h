@@ -10,6 +10,7 @@ class ModelRenderer3D : public IComponent
 {
 public:
     ModelRenderer3D(std::string loadPath, Material* material);
+    ~ModelRenderer3D() = default;
 
     void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList) override;
     void Update(Actor* owner) override;
@@ -23,8 +24,8 @@ private:
 
 private:
     std::string mPath;
-    std::shared_ptr<Material> mMat;
-    std::unique_ptr<Model> mModel;
+    Material* mMat;
     std::unique_ptr<GeoObject> mGeoObject;
     std::unique_ptr<MeshGeometry> mMeshGeo;
+    std::vector<RenderItem*> mRenderItems;
 };

@@ -1,8 +1,12 @@
 ﻿#include "ModelRenderer3D.h"
 
+#include "Transform.h"
+#include "../Actors/Actor.h"
+
 ModelRenderer3D::ModelRenderer3D(std::string loadPath, Material* material)
     : mPath(loadPath)
     , mMat(material)
+    , mRenderItems(std::vector<RenderItem*>())
 {
 }
 
@@ -12,6 +16,7 @@ void ModelRenderer3D::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList
 
     for (auto& renderItem : BuildRenderItems())
     {
+        mRenderItems.push_back(renderItem.get());
         rItemsList.RegisterRenderItem(renderItem);
     }
 }
@@ -29,26 +34,29 @@ void ModelRenderer3D::LoadModel(ID3D12Device* device, ID3D12GraphicsCommandList*
 
 void ModelRenderer3D::Update(Actor* owner)
 {
-    // do nothing
+    Transform* transform;
+    if (owner->TryGetComponent(&transform))
+    {
+        for (auto& renderItem : mRenderItems)
+            XMStoreFloat4x4(
+                &renderItem->World,
+                transform->Scale * transform->Rotation * transform->Position 
+            );
+    }
 }
 
 void ModelRenderer3D::LoadFromDiskToMemory()
 {
-    std::unique_ptr<Model> model = std::make_unique<Model>(GetModelName(), mPath);
-    
-    XMMATRIX modelScale;
-    float scale = 1;
-    modelScale = XMMatrixScaling(scale, scale, scale);
-    
-    XMMATRIX modelRot;
-    modelRot = XMMatrixRotationX(MathHelper::Pi / 2);// *XMMatrixRotationY(MathHelper::Pi / 2);
-    
-    XMMATRIX modelOffset;
-    modelOffset = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-    
-    model->SetScale(modelScale);
-    model->SetRotate(modelRot);
-    model->SetTransform(modelOffset);
+    auto model = std::make_unique<Model>(GetModelName(), mPath);
+
+    XMMATRIX dftScale = XMMatrixScaling(1, 1, 1);
+    model->SetScale(dftScale);
+
+    XMMATRIX dftRot = XMMatrixRotationX(MathHelper::Pi / 2);
+    model->SetRotate(dftRot);
+
+    XMMATRIX dftPos = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+    model->SetTransform(dftPos);
     
     mGeoObject = std::move(model);
 }
@@ -94,7 +102,7 @@ std::vector<std::unique_ptr<RenderItem>> ModelRenderer3D::BuildRenderItems()
         XMStoreFloat4x4(&item->World, mGeoObject->GetWorld());
         item->TexTransform = mesh.material.MatTransform;
 
-        item->Mat = mMat.get();
+        item->Mat = mMat;
         item->Obj = mGeoObject.get();
         item->Geo = mMeshGeo.get();
         item->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
