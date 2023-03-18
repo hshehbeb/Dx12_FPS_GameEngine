@@ -40,7 +40,7 @@ void ModelRenderer3D::Update(Actor* owner)
         for (auto& renderItem : mRenderItems)
             XMStoreFloat4x4(
                 &renderItem->World,
-                transform->Scale * transform->Rotation * transform->Position 
+                transform->GetWorldMatrix()
             );
     }
 }

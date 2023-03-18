@@ -271,6 +271,7 @@
     </ClCompile>
     <ClCompile Include="Core\Components\PlayerMovement.cpp" />
     <ClCompile Include="Core\Components\GravitySimulator.cpp" />
+    <ClCompile Include="Core\Components\StoryTeller.cpp" />
     <ClCompile Include="Core\Components\Transform.cpp" />
     <ClCompile Include="Core\ModelLoading\GeoObject.cpp" />
     <ClCompile Include="Core\ModelLoading\Model.cpp">
@@ -516,12 +517,14 @@
     <ClInclude Include="..\..\Common\GeometryGenerator.h" />
     <ClInclude Include="..\..\Common\MathHelper.h" />
     <ClInclude Include="..\..\Common\UploadBuffer.h" />
+    <ClInclude Include="ActorUtilis.h" />
     <ClInclude Include="Core\Actors\Actor.h" />
     <ClInclude Include="Core\Button.h" />
     <ClInclude Include="Core\Components\IComponent.h" />
     <ClInclude Include="Core\Components\ModelRenderer3D.h" />
     <ClInclude Include="Core\Components\PlayerMovement.h" />
     <ClInclude Include="Core\Components\GravitySimulator.h" />
+    <ClInclude Include="Core\Components\StoryTeller.h" />
     <ClInclude Include="Core\Components\Transform.h" />
     <ClInclude Include="Core\Log.h" />
     <ClInclude Include="Core\ModelLoading\GeoObject.h" />
