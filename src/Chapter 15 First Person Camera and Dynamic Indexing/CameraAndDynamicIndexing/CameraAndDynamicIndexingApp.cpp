@@ -15,6 +15,7 @@
 #include "Core/Components/GravitySimulator.h"
 #include "Core/Components/ModelRenderer3D.h"
 #include "Core/Components/PlayerMovement.h"
+#include "Core/Components/StoryTeller.h"
 #include "Core/Components/Transform.h"
 #include "Core/UIWidgets/AxisIndicator.h"
 #include "DataStructures/EfficientLookup.h"
@@ -205,16 +206,16 @@ void CameraAndDynamicIndexingApp::InitImages()
         100, 100,
         Resources::CharacterTextures[3].get())
         );
-    mImagesRegistry.Add(std::make_shared<Image>(
-        ScreenSpacePoint {500, 100},
-        100, 100,
-        Resources::CharacterTextures[4].get())
-        );
-    mImagesRegistry.Add(std::make_shared<Image>(
-        ScreenSpacePoint {600, 100},
-        100, 100,
-        Resources::CharacterTextures[5].get())
-        );
+    // mImagesRegistry.Add(std::make_shared<Image>(
+    //     ScreenSpacePoint {500, 100},
+    //     100, 100,
+    //     Resources::CharacterTextures[4].get())
+    //     );
+    // mImagesRegistry.Add(std::make_shared<Image>(
+    //     ScreenSpacePoint {600, 100},
+    //     100, 100,
+    //     Resources::CharacterTextures[5].get())
+    //     );
 
     /* player body */
     mImagesRegistry.Add(std::make_shared<Image>(
@@ -249,7 +250,8 @@ bool CameraAndDynamicIndexingApp::Initialize()
     mPlayer2 = std::make_unique<Actor>(
         std::vector<std::shared_ptr<IComponent>> {
             std::make_shared<PlayerMovement>(mCamera),
-            std::make_shared<GravitySimulator>()
+            std::make_shared<GravitySimulator>(),
+            std::make_shared<Transform>()
         }
     );
     
@@ -1027,17 +1029,19 @@ void CameraAndDynamicIndexingApp::BuildNPCs()
 {
     const float SCALE = 1;
     
-    auto grass = std::make_unique<Actor>(
+    auto npc = std::make_unique<Actor>(
            std::vector<std::shared_ptr<IComponent>> {
                std::make_unique<ModelRenderer3D>("./Models/lu/lu.fbx",
                    mMaterials["stone0"].get()),
                std::make_shared<Transform>(
-                   XMMatrixTranslation(0, 0, 0),
-                   XMMatrixRotationX(MathHelper::Pi / 2),
-                   XMMatrixScaling(SCALE, SCALE, SCALE))
+                   XMFLOAT3 {0, 0, 0},
+                   XMFLOAT3 {SCALE, SCALE, SCALE}),
+               std::make_shared<StoryTeller>(
+                   mPlayer2.get(),
+                   std::vector<Image*> { mImagesRegistry.GetValues().at(0).get(), mImagesRegistry.GetValues().at(1).get(), mImagesRegistry.GetValues().at(2).get(), mImagesRegistry.GetValues().at(3).get() })
            }
        );
-    mSceneActors.push_back(std::move(grass));
+    mSceneActors.push_back(std::move(npc));
 }
 
 void CameraAndDynamicIndexingApp::BuildScene()
@@ -1056,76 +1060,6 @@ void CameraAndDynamicIndexingApp::BuildScene()
     {
         mOpaqueRitems.push_back(e.get());
     }
-    
-	// XMMATRIX brickTexTransform = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	// for(int i = 0; i < 5; ++i)
-	// {
-	// 	auto leftCylRitem = std::make_unique<RenderItem>();
-	// 	auto rightCylRitem = std::make_unique<RenderItem>();
-	// 	auto leftSphereRitem = std::make_unique<RenderItem>();
-	// 	auto rightSphereRitem = std::make_unique<RenderItem>();
-	//
-	// 	XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i*5.0f);
-	// 	XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i*5.0f);
-	//
-	// 	XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i*5.0f);
-	// 	XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i*5.0f);
-	//
-	// 	XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
-	// 	XMStoreFloat4x4(&leftCylRitem->TexTransform, brickTexTransform);
-	// 	// leftCylRitem->ObjCBIndex = mObjCBIndex++;
-	// 	leftCylRitem->Mat = mMaterials["bricks0"].get();
-	// 	leftCylRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	leftCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-	// 	leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-	// 	leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-	//
-	// 	XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
-	// 	XMStoreFloat4x4(&rightCylRitem->TexTransform, brickTexTransform);
-	// 	// rightCylRitem->ObjCBIndex = mObjCBIndex++;
-	// 	rightCylRitem->Mat = mMaterials["bricks0"].get();
-	// 	rightCylRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	rightCylRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-	// 	rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-	// 	rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-	//
-	// 	XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
-	// 	leftSphereRitem->TexTransform = MathHelper::Identity4x4();
-	// 	// leftSphereRitem->ObjCBIndex = mObjCBIndex++;
-	// 	leftSphereRitem->Mat = mMaterials["stone0"].get();
-	// 	leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	leftSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-	// 	leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-	// 	leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-	//
-	// 	XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
-	// 	rightSphereRitem->TexTransform = MathHelper::Identity4x4();
-	// 	// rightSphereRitem->ObjCBIndex = mObjCBIndex++;
-	// 	rightSphereRitem->Mat = mMaterials["stone0"].get();
-	// 	rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
-	// 	rightSphereRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	// 	rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-	// 	rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-	// 	rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-	//
-	// 	mAllRenderItems.RegisterRenderItem(leftCylRitem);
-	// 	mAllRenderItems.RegisterRenderItem(rightCylRitem);
-	// 	mAllRenderItems.RegisterRenderItem(leftSphereRitem);
-	// 	mAllRenderItems.RegisterRenderItem(rightSphereRitem);
-	// }
-    
-    // auto flower = std::make_unique<Actor>(
-    //     std::vector<std::shared_ptr<IComponent>> {
-    //         std::make_unique<ModelRenderer3D>("./Models/flower/flower.fbx",
-    //             mMaterials["bricks0"].get()),
-    //         std::make_shared<Transform>(
-    //             XMMatrixTranslation(10, 0, 10))
-    //     }
-    // );
-    // mSceneActors.push_back(std::move(flower));
 }
 
 void CameraAndDynamicIndexingApp::BuildGrassLand()
@@ -1139,9 +1073,8 @@ void CameraAndDynamicIndexingApp::BuildGrassLand()
                 std::make_unique<ModelRenderer3D>("./Models/grass/grass.fbx",
                     mMaterials["stone0"].get()),
                 std::make_shared<Transform>(
-                    XMMatrixTranslation(rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f, 0, rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f),
-                    XMMatrixRotationX(MathHelper::Pi / 2),
-                    XMMatrixScaling(0.02, 0.02, 0.02))
+                    XMFLOAT3 {rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f, 0, rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f},
+                    XMFLOAT3 {0.02, 0.02, 0.02})
             }
         );
         mSceneActors.push_back(std::move(grass));
@@ -1154,9 +1087,8 @@ void CameraAndDynamicIndexingApp::BuildGrassLand()
                 std::make_unique<ModelRenderer3D>("./Models/flower/flower.fbx",
                     mMaterials["crate0"].get()),
                 std::make_shared<Transform>(
-                    XMMatrixTranslation(rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f, 0, rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f),
-                    XMMatrixRotationX(MathHelper::Pi / 2),
-                    XMMatrixScaling(0.4, 0.4, 0.4))
+                    XMFLOAT3 {rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f, 0, rand() % VOLUME_SIZE - VOLUME_SIZE / 2.0f},
+                    XMFLOAT3 {0.4, 0.4, 0.4})
             }
         );
         mSceneActors.push_back(std::move(flower));

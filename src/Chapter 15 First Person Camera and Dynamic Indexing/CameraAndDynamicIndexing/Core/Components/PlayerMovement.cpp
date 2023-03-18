@@ -1,6 +1,7 @@
 ﻿#include "PlayerMovement.h"
 
 #include "GravitySimulator.h"
+#include "Transform.h"
 #include "../Actors/Actor.h"
 
 PlayerMovement::PlayerMovement(Camera& camera, float&& moveSpeed, float&& jumpSpeed)
@@ -38,6 +39,12 @@ void PlayerMovement::Update(Actor* owner)
         beforeMv.z + translation.z
     };
     mCamera.SetPosition(afterMv);
+
+    Transform* trans;
+    if (owner->TryGetComponent(&trans))
+    {
+        trans->SetPosition(afterMv);
+    }
 
     /* ready for next frame to use */
     mMoveDirectionThisFrame = {};
