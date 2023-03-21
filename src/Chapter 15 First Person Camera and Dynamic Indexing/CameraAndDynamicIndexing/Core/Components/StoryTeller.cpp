@@ -29,6 +29,6 @@ void StoryTeller::SetConversationActive(bool isOn)
 {
     for (auto& img : mImgConversation)
     {
-        img->shouldDraw = isOn;
+        img->Visible = isOn;
     }
 }

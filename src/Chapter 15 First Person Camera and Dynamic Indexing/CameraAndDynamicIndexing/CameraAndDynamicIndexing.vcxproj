@@ -505,6 +505,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Core\UIWidgets\Image2D.cpp" />
+    <ClCompile Include="Core\UIWidgets\Image3D.cpp" />
     <ClCompile Include="Core\UIWidgets\ImageBase.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -590,6 +592,8 @@
     <ClInclude Include="Core\ModelLoading\Model.h" />
     <ClInclude Include="Core\ModelLoading\ModelImporter.h" />
     <ClInclude Include="Core\UIWidgets\AxisIndicator.h" />
+    <ClInclude Include="Core\UIWidgets\Image2D.h" />
+    <ClInclude Include="Core\UIWidgets\Image3D.h" />
     <ClInclude Include="Core\UIWidgets\ImageBase.h" />
     <ClInclude Include="DataStructures\EfficientLookup.h" />
     <ClInclude Include="DataStructures\RenderItem.h" />

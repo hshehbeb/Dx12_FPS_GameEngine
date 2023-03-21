@@ -8,11 +8,11 @@
 
 struct Vertex;
 
-ImageBase::ImageBase(ScreenSpacePoint position, int width, int height, Texture* pTexture)
-    : shouldDraw(true)
-    , position(position)
-    , width(width)
-    , height(height)
+ImageBase::ImageBase(Texture* pTexture)
+    : Visible(true)
+    // , position(position)
+    // , width(width)
+    // , height(height)
     , mTexture(pTexture)
 {
 }
@@ -23,26 +23,6 @@ void ImageBase::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdL
     BuildDescriptorHeap(*device);
     BuildConstantBuffer(*device);
     BuildQuadGeometry(*device, *cmdList);
-}
-
-DirectX::XMFLOAT4X4 ImageBase::CalculateMVPMatrix() const
-{
-    float W = D3DApp::GetApp()->mClientWidth;
-    float H = D3DApp::GetApp()->mClientHeight;
-    
-    float a = width * 2 / W;
-    float b = position.x * 2 / W - 1;
-    float c = height * 2 / H;
-    float d = -position.y * 2 / H + 1;
-    float z = 0.01f;
-
-    return DirectX::XMFLOAT4X4
-    {
-        a, 0, 0, 0,
-        0, c, 0, 0,
-        0, 0, 0, 0,
-        b, d, z, 1
-    };
 }
 
 void ImageBase::BuildDescriptorHeap(ID3D12Device& device)
@@ -151,7 +131,7 @@ void ImageBase::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandLis
 
 void ImageBase::Draw(ID3D12GraphicsCommandList* cmdList)
 {
-    if (!shouldDraw)
+    if (!Visible)
     {
         return;
     }

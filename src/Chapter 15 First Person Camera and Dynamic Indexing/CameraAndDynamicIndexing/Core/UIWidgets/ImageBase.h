@@ -16,13 +16,14 @@ class ImageBase : public IBatchable
     struct ConstantBuffer { DirectX::XMFLOAT4X4 MVPMatrix = MathHelper::Identity4x4(); };
     
 public:
-    bool shouldDraw;
-    ScreenSpacePoint position;
-    int width;
-    int height;
+    
+    /**
+     * whether this Image should be drawn
+     */
+    bool Visible;
 
 public:
-    explicit ImageBase(ScreenSpacePoint position, int width, int height, Texture* pTexture);
+    explicit ImageBase(Texture* pTexture);
 
     void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) override;
     void Draw(ID3D12GraphicsCommandList* cmdList) override;
@@ -36,8 +37,8 @@ private:
     std::unique_ptr<UploadBuffer<ConstantBuffer>> mConstantBuffer = nullptr;
     Texture* mTexture = nullptr;
 
-private:
-    DirectX::XMFLOAT4X4 CalculateMVPMatrix() const;
+protected:
+    virtual DirectX::XMFLOAT4X4 CalculateMVPMatrix() const = 0;
     void BuildDescriptorHeap(ID3D12Device& device);
     void BuildConstantBuffer(ID3D12Device& device);
     void BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList);

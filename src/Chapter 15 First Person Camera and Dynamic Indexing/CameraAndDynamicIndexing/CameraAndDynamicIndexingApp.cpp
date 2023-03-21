@@ -18,6 +18,7 @@
 #include "Core/Components/StoryTeller.h"
 #include "Core/Components/Transform.h"
 #include "Core/UIWidgets/AxisIndicator.h"
+#include "Core/UIWidgets/Image2D.h"
 #include "DataStructures/EfficientLookup.h"
 #include "DataStructures/RenderItem.h"
 #include "DataStructures/RenderItemsList.h"
@@ -186,46 +187,36 @@ void CameraAndDynamicIndexingApp::InitButtons()
 void CameraAndDynamicIndexingApp::InitImages()
 {
     /* start up characters */
-    mImagesRegistry.Add(std::make_shared<ImageBase>(
+    mImagesRegistry.Add(std::make_shared<Image2D>(
             ScreenSpacePoint {100, 100},
             100, 100,
             Resources::CharacterTextures[0].get())
             );
-    mImagesRegistry.Add(std::make_shared<ImageBase>(
+    mImagesRegistry.Add(std::make_shared<Image2D>(
         ScreenSpacePoint {200, 100},
         100, 100,
         Resources::CharacterTextures[1].get())
         );
-    mImagesRegistry.Add(std::make_shared<ImageBase>(
+    mImagesRegistry.Add(std::make_shared<Image2D>(
         ScreenSpacePoint {300, 100},
         100, 100,
         Resources::CharacterTextures[2].get())
         );
-    mImagesRegistry.Add(std::make_shared<ImageBase>(
+    mImagesRegistry.Add(std::make_shared<Image2D>(
         ScreenSpacePoint {400, 100},
         100, 100,
         Resources::CharacterTextures[3].get())
         );
-    // mImagesRegistry.Add(std::make_shared<Image>(
-    //     ScreenSpacePoint {500, 100},
-    //     100, 100,
-    //     Resources::CharacterTextures[4].get())
-    //     );
-    // mImagesRegistry.Add(std::make_shared<Image>(
-    //     ScreenSpacePoint {600, 100},
-    //     100, 100,
-    //     Resources::CharacterTextures[5].get())
-    //     );
 
     /* player body */
-    mImagesRegistry.Add(std::make_shared<ImageBase>(
+    mImagesRegistry.Add(std::make_shared<Image2D>(
         ScreenSpacePoint {630, 520},
         300, 300,
         Resources::RegularTextures["playerTex"].get())
         );
 
     /* crosshairs */
-    mImagesRegistry.Add(std::make_shared<ImageBase>(
+    mImagesRegistry.Add(std::make_shared<Image2D>(
         ScreenSpacePoint {400, 300},
         30, 30,
         Resources::RegularTextures["crosshairsTex"].get())

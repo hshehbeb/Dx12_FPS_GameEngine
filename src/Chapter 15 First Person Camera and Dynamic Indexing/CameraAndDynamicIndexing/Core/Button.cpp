@@ -1,6 +1,7 @@
 ﻿#include "Button.h"
 
 #include "Log.h"
+#include "UIWidgets/Image2D.h"
 
 // void Button::Initialize(UIObjectsCollection* uiObjsCollection)
 // {
@@ -14,7 +15,7 @@ Button::Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture
     , mHeight(height)
     , mOnClickHandle(onClickHandle)
 {
-    image = std::make_shared<ImageBase>(mPos, width, height, pTexture);
+    image = std::make_shared<Image2D>(mPos, width, height, pTexture);
 }
 
 bool Button::CheckIfClicked(const ScreenSpacePoint& clickPos)
@@ -51,6 +52,6 @@ ScreenSpacePoint Button::GetMaxCorner()
 
 void Button::SetShouldDraw(bool newValue)
 {
-    image->shouldDraw = newValue;
+    image->Visible = newValue;
 }
 
