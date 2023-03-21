@@ -13,11 +13,11 @@ AxisIndicator::AxisIndicator(
 {
 }
 
-void AxisIndicator::Initailize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
+void AxisIndicator::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
-    BuildDescriptorHeap(device, cmdList);
-    BuildActualDescriptor(device);
-    BuildGeometry(device, cmdList);
+    BuildDescriptorHeap(*device, *cmdList);
+    BuildActualDescriptor(*device);
+    BuildGeometry(*device, *cmdList);
 }
 
 void AxisIndicator::Draw(ID3D12GraphicsCommandList* cmdList)

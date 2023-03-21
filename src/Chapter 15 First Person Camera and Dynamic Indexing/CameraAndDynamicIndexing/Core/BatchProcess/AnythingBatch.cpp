@@ -1,29 +1,29 @@
-﻿#include "ImageBatch.h"
+﻿#include "AnythingBatch.h"
 
-#include "../../Common/d3dApp.h"
+#include "../../../Common/d3dApp.h"
 
-void ImageBatch::Add(std::shared_ptr<Image> uiObj)
+void AnythingBatch::Add(std::shared_ptr<IBatchable> uiObj)
 {
-    mImages.Add(uiObj);
+    mBatchables.Add(uiObj);
 }
 
-void ImageBatch::InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+void AnythingBatch::InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
-    for (auto& uiObj : mImages.GetValues())
-        uiObj->Initialize(*device, *cmdList);
+    for (auto& uiObj : mBatchables.GetValues())
+        uiObj->Initialize(device, cmdList);
 
-    mAxisIndicator->Initailize(*device, *cmdList);
+    // mAxisIndicator->Initailize(*device, *cmdList);
 }
 
-void ImageBatch::UpdateAll()
+void AnythingBatch::UpdateAll()
 {
-    for (auto& uiObj : mImages.GetValues())
+    for (auto& uiObj : mBatchables.GetValues())
         uiObj->Update();
 
-    mAxisIndicator->Update();
+    // mAxisIndicator->Update();
 }
 
-void ImageBatch::DrawAll(ID3D12GraphicsCommandList* cmdList)
+void AnythingBatch::DrawAll(ID3D12GraphicsCommandList* cmdList)
 {
     cmdList->SetPipelineState(mPSOs["std_ui"].Get());
     cmdList->SetGraphicsRootSignature(mRootSignatures["std_ui"].Get());
@@ -38,13 +38,13 @@ void ImageBatch::DrawAll(ID3D12GraphicsCommandList* cmdList)
      * likely we sampled an alpha value.
      * and cause this class simply not passing the ALPHA_TEST.
      */
-    mAxisIndicator->Draw(cmdList);
+    // mAxisIndicator->Draw(cmdList);
     
-    for (auto& uiObj : mImages.GetValues())
+    for (auto& uiObj : mBatchables.GetValues())
         uiObj->Draw(cmdList);
 }
 
-ImageBatch::t_PSOsRegistry ImageBatch::BuildPSOs(ID3D12Device* device)
+AnythingBatch::t_PSOsRegistry AnythingBatch::BuildPSOs(ID3D12Device* device)
 {
     t_PSOsRegistry result {};
 
@@ -53,7 +53,7 @@ ImageBatch::t_PSOsRegistry ImageBatch::BuildPSOs(ID3D12Device* device)
     return result;
 }
 
-void ImageBatch::BuildPSO(
+void AnythingBatch::BuildPSO(
     ID3D12Device* device,
     IN std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout,
     IN ID3D12RootSignature* pRootSignature,
@@ -86,7 +86,7 @@ void ImageBatch::BuildPSO(
     );
 }
 
-void ImageBatch::BuildStdUiPSO(
+void AnythingBatch::BuildStdUiPSO(
     IN ID3D12Device* device,
     OUT Microsoft::WRL::ComPtr<ID3D12PipelineState>& resultPSO)
     
@@ -112,7 +112,7 @@ void ImageBatch::BuildStdUiPSO(
     );
 }
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> ImageBatch::StdUiInputLayout()
+std::vector<D3D12_INPUT_ELEMENT_DESC> AnythingBatch::StdUiInputLayout()
 {
     const D3D_SHADER_MACRO alphaTestDefines[] =
     {
@@ -127,13 +127,13 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> ImageBatch::StdUiInputLayout()
     };
 }
 
-void ImageBatch::CompileStdShaders()
+void AnythingBatch::CompileStdShaders()
 {
     mShaders["std_ui_VS"] = d3dUtil::CompileShader(L"Shaders\\vet_renderer2d.hlsl", nullptr, "main", "vs_5_0");
     mShaders["std_ui_PS"] = d3dUtil::CompileShader(L"Shaders\\pxl_renderer2d.hlsl", nullptr, "main", "ps_5_0");
 }
 
-void ImageBatch::BuildStdRootSignature(ID3D12Device& device)
+void AnythingBatch::BuildStdRootSignature(ID3D12Device& device)
 {
     CD3DX12_ROOT_PARAMETER slotRootParameter[2];
     
@@ -173,7 +173,7 @@ void ImageBatch::BuildStdRootSignature(ID3D12Device& device)
         IID_PPV_ARGS(&mRootSignatures["std_ui"])));
 }
 
-std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> ImageBatch::GetStaticSamplers()
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> AnythingBatch::GetStaticSamplers()
 {
     // Applications usually only need a handful of samplers.  So just define them all up front
 	// and keep them available as part of the root signature.  

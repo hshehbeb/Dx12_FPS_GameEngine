@@ -14,7 +14,7 @@ Button::Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture
     , mHeight(height)
     , mOnClickHandle(onClickHandle)
 {
-    image = std::make_shared<Image>(mPos, width, height, pTexture);
+    image = std::make_shared<ImageBase>(mPos, width, height, pTexture);
 }
 
 bool Button::CheckIfClicked(const ScreenSpacePoint& clickPos)

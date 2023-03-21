@@ -8,7 +8,7 @@ class EfficientLookup
 {
 public:
     EfficientLookup() = default;
-    EfficientLookup(EfficientLookup& other) = delete;
+    EfficientLookup(EfficientLookup& other) = default;
     EfficientLookup(EfficientLookup&& other)
         : mRegistry(std::move(other.mRegistry))
         , mValues(std::move(other.mValues))

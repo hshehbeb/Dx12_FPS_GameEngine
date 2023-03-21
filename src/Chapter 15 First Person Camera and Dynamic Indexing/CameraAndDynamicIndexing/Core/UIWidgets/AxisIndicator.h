@@ -7,8 +7,9 @@
 #include "../../../../Common/Camera.h"
 #include "../../../../Common/UploadBuffer.h"
 #include "../../DataStructures/ScreenSpacePoint.h"
+#include "../BatchProcess/IBatchable.h"
 
-class AxisIndicator
+class AxisIndicator : public IBatchable
 {
     struct ConstantBuffer { DirectX::XMFLOAT4X4 MVPMatrix = MathHelper::Identity4x4(); };
 
@@ -20,9 +21,9 @@ public:
 public:
     AxisIndicator(ScreenSpacePoint position, int width, int height, Camera* camera);
     
-    void Initailize(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList);
-    void Draw(ID3D12GraphicsCommandList* cmdList);
-    void Update();
+    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) override;
+    void Draw(ID3D12GraphicsCommandList* cmdList) override;
+    void Update() override;
 
 private:
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvHeap; 

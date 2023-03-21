@@ -1,9 +1,9 @@
 ﻿#include "StoryTeller.h"
 
 #include "../../ActorUtilis.h"
-#include "../UIWidgets/Image.h"
+#include "../UIWidgets/ImageBase.h"
 
-StoryTeller::StoryTeller(Actor* talkTarget, std::vector<Image*> imgConversation)
+StoryTeller::StoryTeller(Actor* talkTarget, std::vector<ImageBase*> imgConversation)
     : mTalkTarget(talkTarget)
     , mImgConversation(std::move(imgConversation))
 {

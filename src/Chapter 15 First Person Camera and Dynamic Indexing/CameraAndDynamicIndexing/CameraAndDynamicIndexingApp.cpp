@@ -8,7 +8,7 @@
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
-#include "ImageBatch.h"
+#include "Core/BatchProcess/AnythingBatch.h"
 #include "Core/Button.h"
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
@@ -110,12 +110,12 @@ private:
     
 	Camera mCamera;
 
-    // std::unique_ptr<UIObject> mUIObj = nullptr;
-    std::unique_ptr<AxisIndicator> mAxisIndicator;
-    std::unique_ptr<ImageBatch> mImageBatch;
+    // std::unique_ptr<AxisIndicator> mAxisIndicator;
+    std::unique_ptr<AnythingBatch> mImageBatch;
+    std::unique_ptr<AnythingBatch> mAxisIndicatorBatch;
     
     EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
-    EfficientLookup<std::shared_ptr<Image>>  mImagesRegistry;
+    EfficientLookup<std::shared_ptr<IBatchable>>  mImagesRegistry;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -186,22 +186,22 @@ void CameraAndDynamicIndexingApp::InitButtons()
 void CameraAndDynamicIndexingApp::InitImages()
 {
     /* start up characters */
-    mImagesRegistry.Add(std::make_shared<Image>(
+    mImagesRegistry.Add(std::make_shared<ImageBase>(
             ScreenSpacePoint {100, 100},
             100, 100,
             Resources::CharacterTextures[0].get())
             );
-    mImagesRegistry.Add(std::make_shared<Image>(
+    mImagesRegistry.Add(std::make_shared<ImageBase>(
         ScreenSpacePoint {200, 100},
         100, 100,
         Resources::CharacterTextures[1].get())
         );
-    mImagesRegistry.Add(std::make_shared<Image>(
+    mImagesRegistry.Add(std::make_shared<ImageBase>(
         ScreenSpacePoint {300, 100},
         100, 100,
         Resources::CharacterTextures[2].get())
         );
-    mImagesRegistry.Add(std::make_shared<Image>(
+    mImagesRegistry.Add(std::make_shared<ImageBase>(
         ScreenSpacePoint {400, 100},
         100, 100,
         Resources::CharacterTextures[3].get())
@@ -218,14 +218,14 @@ void CameraAndDynamicIndexingApp::InitImages()
     //     );
 
     /* player body */
-    mImagesRegistry.Add(std::make_shared<Image>(
+    mImagesRegistry.Add(std::make_shared<ImageBase>(
         ScreenSpacePoint {630, 520},
         300, 300,
         Resources::RegularTextures["playerTex"].get())
         );
 
     /* crosshairs */
-    mImagesRegistry.Add(std::make_shared<Image>(
+    mImagesRegistry.Add(std::make_shared<ImageBase>(
         ScreenSpacePoint {400, 300},
         30, 30,
         Resources::RegularTextures["crosshairsTex"].get())
@@ -259,18 +259,19 @@ bool CameraAndDynamicIndexingApp::Initialize()
     
 	LoadTextures();
     
-    mAxisIndicator = std::make_unique<AxisIndicator>(
-        ScreenSpacePoint {70, 550}, 50, 50, &mCamera
-        );
-    
     InitImages();
     InitButtons();
     
-    mImageBatch = std::make_unique<ImageBatch>(
-        md3dDevice.Get(), mAxisIndicator.get(), mImagesRegistry
+    mAxisIndicatorBatch =
+        std::make_unique<AnythingBatch>(md3dDevice.Get());
+    mAxisIndicatorBatch->Add(std::make_shared<AxisIndicator>(
+        ScreenSpacePoint {70, 550}, 50, 50, &mCamera)
         );
-    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+    mAxisIndicatorBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
+    mImageBatch =
+        std::make_unique<AnythingBatch>(md3dDevice.Get(), mImagesRegistry);
+    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
  
     BuildRootSignature();
 	BuildDescriptorHeaps();
@@ -310,7 +311,7 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
     
     OnKeyboardInput(gt);
     
-    // mPlayer->Update();
+    mAxisIndicatorBatch->UpdateAll();
     mImageBatch->UpdateAll();
 
     // Cycle through the circular frame resource array.
@@ -385,9 +386,8 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
     
 	Draw3dObjects();
     
-    // mCommandList->SetPipelineState(mPSOs["ui"].Get());
+    mAxisIndicatorBatch->DrawAll(mCommandList.Get());
     mImageBatch->DrawAll(mCommandList.Get());
-    // mUIObj->Draw(mCommandList);
     
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -1038,7 +1038,12 @@ void CameraAndDynamicIndexingApp::BuildNPCs()
                    XMFLOAT3 {SCALE, SCALE, SCALE}),
                std::make_shared<StoryTeller>(
                    mPlayer2.get(),
-                   std::vector<Image*> { mImagesRegistry.GetValues().at(0).get(), mImagesRegistry.GetValues().at(1).get(), mImagesRegistry.GetValues().at(2).get(), mImagesRegistry.GetValues().at(3).get() })
+                   std::vector<ImageBase*> {
+                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(0).get()),
+                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(1).get()),
+                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(2).get()),
+                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(3).get())
+                   })
            }
        );
     mSceneActors.push_back(std::move(npc));
