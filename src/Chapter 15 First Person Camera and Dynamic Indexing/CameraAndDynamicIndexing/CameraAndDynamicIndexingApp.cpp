@@ -8,10 +8,11 @@
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
-#include "Core/BatchProcess/AnythingBatch.h"
+#include "Core/BatchProcess/BatchBase.h"
 #include "Core/Button.h"
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
+#include "Core/BatchProcess/StdUIBatch.h"
 #include "Core/Components/GravitySimulator.h"
 #include "Core/Components/ModelRenderer3D.h"
 #include "Core/Components/PlayerMovement.h"
@@ -112,11 +113,14 @@ private:
 	Camera mCamera;
 
     // std::unique_ptr<AxisIndicator> mAxisIndicator;
-    std::unique_ptr<AnythingBatch> mImageBatch;
-    std::unique_ptr<AnythingBatch> mAxisIndicatorBatch;
+    std::unique_ptr<BatchBase> mImageBatch;
+    std::unique_ptr<BatchBase> mAxisIndicatorBatch;
+    std::unique_ptr<BatchBase> mCharBatch;
     
     EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
     EfficientLookup<std::shared_ptr<IBatchable>>  mImagesRegistry;
+
+    Transform* mSampleImg3D;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -254,15 +258,23 @@ bool CameraAndDynamicIndexingApp::Initialize()
     InitButtons();
     
     mAxisIndicatorBatch =
-        std::make_unique<AnythingBatch>(md3dDevice.Get());
+        std::make_unique<StdUIBatch>();
     mAxisIndicatorBatch->Add(std::make_shared<AxisIndicator>(
         ScreenSpacePoint {70, 550}, 50, 50, &mCamera)
         );
     mAxisIndicatorBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
     mImageBatch =
-        std::make_unique<AnythingBatch>(md3dDevice.Get(), mImagesRegistry);
+        std::make_unique<StdUIBatch>(mImagesRegistry);
     mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+
+    // make Batch accepts config args
+    // mCharBatch =
+    //     std::make_unique<AnythingBatch>(md3dDevice.Get());
+    // mSampleImg3D = new Transform();
+    // mCharBatch->Add(std::make_shared<Image3D>(
+    //     100, 100, mSampleImg3D, Resources::CharacterTextures[0].get())
+    //     );
  
     BuildRootSignature();
 	BuildDescriptorHeaps();
@@ -907,42 +919,6 @@ void CameraAndDynamicIndexingApp::BuildPSOs()
 	opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = mDepthStencilFormat;
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
-
-    
-    // PSO for ui objects.
-    
-    // D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
-    //
-    // ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-    // psoDesc.InputLayout =
-    // {
-    //     mUIObj->GetInputLayout().data(),
-    //     static_cast<UINT>(mUIObj->GetInputLayout().size())
-    // };
-    // psoDesc.pRootSignature = mUIObj->GetRootSignature().Get();
-    // psoDesc.VS = 
-    // {
-    //     reinterpret_cast<BYTE*>(mUIObj->GetVertexShaderCode()->GetBufferPointer()), 
-    //     mUIObj->GetVertexShaderCode()->GetBufferSize() 
-    // };
-    // psoDesc.PS = 
-    // { 
-    //     reinterpret_cast<BYTE*>(mUIObj->GetPixelShaderCode()->GetBufferPointer()), 
-    //     mUIObj->GetPixelShaderCode()->GetBufferSize() 
-    // };
-    // psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    // psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    // psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    // psoDesc.SampleMask = UINT_MAX;
-    // psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    // psoDesc.NumRenderTargets = 1;
-    // psoDesc.RTVFormats[0] = mBackBufferFormat;
-    // psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
-    // psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
-    // psoDesc.DSVFormat = mDepthStencilFormat;
-    //
-    // auto ret = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSOs["ui"]));
-    // ThrowIfFailed(ret);
 }
 
 void CameraAndDynamicIndexingApp::BuildFrameResources()

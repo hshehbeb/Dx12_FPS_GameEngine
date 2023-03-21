@@ -7,6 +7,7 @@ public:
     Transform(
         XMFLOAT3 pos = {0, 0, 0},
         XMFLOAT3 scale = {1, 1, 1},
+        
         XMFLOAT3 rot = {MathHelper::Pi / 2, 0, 0}
     );
 

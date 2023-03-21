@@ -210,7 +210,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
-    <ClCompile Include="Core\BatchProcess\AnythingBatch.cpp">
+    <ClCompile Include="Core\BatchProcess\BatchBase.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <Optimization>Disabled</Optimization>
@@ -268,6 +268,7 @@
       <AdditionalIncludeDirectories>C:\Users\sherlock\Code\theirs\intro-to-dx12\src\Chapter 15 First Person Camera and Dynamic Indexing\CameraAndDynamicIndexing\/assimp;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Core\BatchProcess\StdUIBatch.cpp" />
     <ClCompile Include="Core\Button.cpp" />
     <ClCompile Include="Core\Components\ModelRenderer3D.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
@@ -506,7 +507,6 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="Core\UIWidgets\Image2D.cpp" />
-    <ClCompile Include="Core\UIWidgets\Image3D.cpp" />
     <ClCompile Include="Core\UIWidgets\ImageBase.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -564,6 +564,64 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Core\UIWidgets\Image3D.cpp">
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>false</ConformanceMode>
+      <DiagnosticsFormat>Classic</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <MinimalRebuild>false</MinimalRebuild>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>x64\Debug\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>x64\Debug\vc141.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>x64\Debug\CameraAndDynamicIndexing.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ShowIncludes>false</ShowIncludes>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>x64\Debug\CameraAn.EBA44FF6.tlog\</TrackerLogDirectory>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_DISABLE_EXTENDED_ALIGNED_STORAGE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\sherlock\Code\theirs\intro-to-dx12\src\Chapter 15 First Person Camera and Dynamic Indexing\CameraAndDynamicIndexing\/assimp;</AdditionalIncludeDirectories>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
     <ClCompile Include="FrameResource.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -578,8 +636,9 @@
     <ClInclude Include="..\..\Common\UploadBuffer.h" />
     <ClInclude Include="ActorUtilis.h" />
     <ClInclude Include="Core\Actors\Actor.h" />
-    <ClInclude Include="Core\BatchProcess\AnythingBatch.h" />
+    <ClInclude Include="Core\BatchProcess\BatchBase.h" />
     <ClInclude Include="Core\BatchProcess\IBatchable.h" />
+    <ClInclude Include="Core\BatchProcess\StdUIBatch.h" />
     <ClInclude Include="Core\Button.h" />
     <ClInclude Include="Core\Components\IComponent.h" />
     <ClInclude Include="Core\Components\ModelRenderer3D.h" />
@@ -593,8 +652,8 @@
     <ClInclude Include="Core\ModelLoading\ModelImporter.h" />
     <ClInclude Include="Core\UIWidgets\AxisIndicator.h" />
     <ClInclude Include="Core\UIWidgets\Image2D.h" />
-    <ClInclude Include="Core\UIWidgets\Image3D.h" />
     <ClInclude Include="Core\UIWidgets\ImageBase.h" />
+    <ClInclude Include="Core\UIWidgets\Image3D.h" />
     <ClInclude Include="DataStructures\EfficientLookup.h" />
     <ClInclude Include="DataStructures\RenderItem.h" />
     <ClInclude Include="DataStructures\RenderItemsList.h" />
