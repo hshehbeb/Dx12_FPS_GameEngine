@@ -43,10 +43,4 @@ protected:
     
     void BatchBase::BuildPSO(ID3D12Device* device, IN std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout, IN ID3D12RootSignature* pRootSignature, IN D3D12_SHADER_BYTECODE vsByteCode, IN D3D12_SHADER_BYTECODE psByteCode, OUT Microsoft::WRL::ComPtr<ID3D12PipelineState>& resultPSO);
     std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
-
-private:
-    void BuildStdOpaquePSO(ID3D12Device* device, Microsoft::WRL::ComPtr<ID3D12PipelineState>& resultPSO);
-    std::vector<D3D12_INPUT_ELEMENT_DESC> StdOpaqueInputLayout();
-    void CompileStdOpaqueShaders();
-    void BuildStdOpaqueRootSignature(ID3D12Device& device);
 };

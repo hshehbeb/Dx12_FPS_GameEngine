@@ -42,16 +42,6 @@ void BatchBase::DrawAll(ID3D12GraphicsCommandList* cmdList)
         uiObj->Draw(cmdList);
 }
 
-// BatchBase::t_PSOsRegistry BatchBase::BuildPSOs(ID3D12Device* device)
-// {
-//     t_PSOsRegistry result {};
-//
-//     BuildStdUiPSO(device, result["std_ui"]);
-//     BuildStdOpaquePSO(device, result["std_opaque"]);
-//
-//     return result;
-// }
-
 void BatchBase::BuildPSO(
     ID3D12Device* device,
     IN std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout,
@@ -83,89 +73,6 @@ void BatchBase::BuildPSO(
     ThrowIfFailed(device->CreateGraphicsPipelineState(
             &psoDesc, IID_PPV_ARGS(&resultPSO))
     );
-}
-
-void BatchBase::BuildStdOpaquePSO(
-    IN ID3D12Device* device,
-    OUT Microsoft::WRL::ComPtr<ID3D12PipelineState>& resultPSO)
-    
-{
-    auto stdInputLayout = StdOpaqueInputLayout();
-    CompileStdOpaqueShaders();
-    BuildStdOpaqueRootSignature(*device);
-
-    D3D12_SHADER_BYTECODE vertShader =
-    {
-        reinterpret_cast<BYTE*>(mShaders["standardVS"]->GetBufferPointer()), 
-        mShaders["standardVS"]->GetBufferSize()
-    };
-    D3D12_SHADER_BYTECODE pixelShader =
-    {
-        reinterpret_cast<BYTE*>(mShaders["opaquePS"]->GetBufferPointer()),
-        mShaders["opaquePS"]->GetBufferSize()
-    };
-    
-    BuildPSO(
-        device, stdInputLayout, mRootSignatures["std_opaque"].Get(),
-        vertShader, pixelShader, resultPSO
-    );
-}
-
-std::vector<D3D12_INPUT_ELEMENT_DESC> BatchBase::StdOpaqueInputLayout()
-{
-    return {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
-}
-
-void BatchBase::CompileStdOpaqueShaders()
-{
-    mShaders["standardVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_1");
-    mShaders["opaquePS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_1");
-}
-
-void BatchBase::BuildStdOpaqueRootSignature(ID3D12Device& device)
-{
-    CD3DX12_DESCRIPTOR_RANGE texTable;
-    texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0, 0);
-
-    // Root parameter can be a table, root descriptor or root constants.
-    CD3DX12_ROOT_PARAMETER slotRootParameter[4];
-
-    // Perfomance TIP: Order from most frequent to least frequent.
-    slotRootParameter[0].InitAsConstantBufferView(0);
-    slotRootParameter[1].InitAsConstantBufferView(1);
-    slotRootParameter[2].InitAsShaderResourceView(0, 1);
-    slotRootParameter[3].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
-
-
-    auto staticSamplers = GetStaticSamplers();
-
-    // A root signature is an array of root parameters.
-    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(4, slotRootParameter,
-        (UINT)staticSamplers.size(), staticSamplers.data(),
-        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-    // create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
-    Microsoft::WRL::ComPtr<ID3DBlob> serializedRootSig = nullptr;
-    Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
-    HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1,
-        serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf());
-
-    if(errorBlob != nullptr)
-    {
-        ::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-    }
-    ThrowIfFailed(hr);
-
-    ThrowIfFailed(device.CreateRootSignature(
-        0,
-        serializedRootSig->GetBufferPointer(),
-        serializedRootSig->GetBufferSize(),
-        IID_PPV_ARGS(mRootSignatures["std_opaque"].GetAddressOf()))
-        );
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> BatchBase::GetStaticSamplers()

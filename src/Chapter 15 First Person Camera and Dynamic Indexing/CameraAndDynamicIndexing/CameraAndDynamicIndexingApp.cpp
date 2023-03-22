@@ -12,6 +12,7 @@
 #include "Core/Button.h"
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
+#include "Core/BatchProcess/StdUnlitBatch.h"
 #include "Core/BatchProcess/StdUIBatch.h"
 #include "Core/Components/GravitySimulator.h"
 #include "Core/Components/ModelRenderer3D.h"
@@ -20,6 +21,7 @@
 #include "Core/Components/Transform.h"
 #include "Core/UIWidgets/AxisIndicator.h"
 #include "Core/UIWidgets/Image2D.h"
+#include "Core/UIWidgets/Image3D.h"
 #include "DataStructures/EfficientLookup.h"
 #include "DataStructures/RenderItem.h"
 #include "DataStructures/RenderItemsList.h"
@@ -268,13 +270,15 @@ bool CameraAndDynamicIndexingApp::Initialize()
         std::make_unique<StdUIBatch>(mImagesRegistry);
     mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
 
-    // make Batch accepts config args
-    // mCharBatch =
-    //     std::make_unique<AnythingBatch>(md3dDevice.Get());
-    // mSampleImg3D = new Transform();
-    // mCharBatch->Add(std::make_shared<Image3D>(
-    //     100, 100, mSampleImg3D, Resources::CharacterTextures[0].get())
-    //     );
+    mCharBatch = std::make_unique<StdUIBatch>();
+    mSampleImg3D = new Transform(
+        {1, 1, 1}, {1, 1, 1}, {0, 0, 0}
+        ); 
+    mCharBatch->Add(std::make_shared<Image3D>(
+        5, 5, mSampleImg3D,
+        Resources::CharacterTextures[0].get(), &mCamera)
+        );
+    mCharBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
  
     BuildRootSignature();
 	BuildDescriptorHeaps();
@@ -316,6 +320,7 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
     
     mAxisIndicatorBatch->UpdateAll();
     mImageBatch->UpdateAll();
+    mCharBatch->UpdateAll();
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -391,6 +396,7 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
     
     mAxisIndicatorBatch->DrawAll(mCommandList.Get());
     mImageBatch->DrawAll(mCommandList.Get());
+    mCharBatch->DrawAll(mCommandList.Get());
     
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -1014,6 +1020,18 @@ void CameraAndDynamicIndexingApp::BuildNPCs()
            }
        );
     mSceneActors.push_back(std::move(npc));
+
+    
+    auto npc2 = std::make_unique<Actor>(
+           std::vector<std::shared_ptr<IComponent>> {
+               std::make_unique<ModelRenderer3D>("./Models/lu/lu.fbx",
+                   mMaterials["stone0"].get()),
+               std::make_shared<Transform>(
+                   XMFLOAT3 {1, 1, 1},
+                   XMFLOAT3 {0.1, 0.1, 0.1}),
+           }
+       );
+    mSceneActors.push_back(std::move(npc2));
 }
 
 void CameraAndDynamicIndexingApp::BuildScene()

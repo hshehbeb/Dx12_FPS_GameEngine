@@ -76,7 +76,8 @@ void ImageBase::BuildConstantBuffer(ID3D12Device& device)
 
     device.CreateConstantBufferView( /* we only need 1 cbv, for caching our matrix */
         &cbvDesc,
-        mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+        mCbvHeap->GetCPUDescriptorHandleForHeapStart()
+        );
 }
 
 void ImageBase::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)

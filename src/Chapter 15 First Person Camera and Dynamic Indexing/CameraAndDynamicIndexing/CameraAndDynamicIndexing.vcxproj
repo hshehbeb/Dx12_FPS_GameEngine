@@ -268,6 +268,7 @@
       <AdditionalIncludeDirectories>C:\Users\sherlock\Code\theirs\intro-to-dx12\src\Chapter 15 First Person Camera and Dynamic Indexing\CameraAndDynamicIndexing\/assimp;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Core\BatchProcess\StdUnlitBatch.cpp" />
     <ClCompile Include="Core\BatchProcess\StdUIBatch.cpp" />
     <ClCompile Include="Core\Button.cpp" />
     <ClCompile Include="Core\Components\ModelRenderer3D.cpp">
@@ -638,6 +639,7 @@
     <ClInclude Include="Core\Actors\Actor.h" />
     <ClInclude Include="Core\BatchProcess\BatchBase.h" />
     <ClInclude Include="Core\BatchProcess\IBatchable.h" />
+    <ClInclude Include="Core\BatchProcess\StdUnlitBatch.h" />
     <ClInclude Include="Core\BatchProcess\StdUIBatch.h" />
     <ClInclude Include="Core\Button.h" />
     <ClInclude Include="Core\Components\IComponent.h" />
