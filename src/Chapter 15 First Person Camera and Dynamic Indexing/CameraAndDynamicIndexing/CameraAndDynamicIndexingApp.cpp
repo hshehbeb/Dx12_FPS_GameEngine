@@ -12,6 +12,7 @@
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
 #include "Core/BatchProcess/AnythingBatch.h"
+#include "Core/Components/AlwaysFaceTarget.h"
 #include "Core/Components/GravitySimulator.h"
 #include "Core/Components/ImageRender3D.h"
 #include "Core/Components/ModelRenderer3D.h"
@@ -121,7 +122,7 @@ private:
     EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
     EfficientLookup<std::shared_ptr<IBatchable>>  mImagesRegistry;
 
-    Actor* mSampleImg3D;
+    // Actor* mSampleImg3D;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -250,6 +251,8 @@ bool CameraAndDynamicIndexingApp::Initialize()
             std::make_shared<Transform>()
         }
     );
+    mPlayer2->Initialize(md3dDevice.Get(), mCommandList.Get(),
+        mAllRenderItems);
     
     // BuildScene();
     
@@ -280,29 +283,17 @@ bool CameraAndDynamicIndexingApp::Initialize()
             L"Shaders\\vet_stdUnlit.hlsl",
             L"Shaders\\pxl_stdUnlit.hlsl"
         });
-    mSampleImg3D = new Actor({
-        std::make_unique<Transform>(
-            XMFLOAT3 {0, 1, 0},
-            XMFLOAT3 {1, 1, 1},
-            XMFLOAT3 {0, 0, 0}
-            ),
-        std::make_unique<ImageRender3D>(
-            mCharBatch.get(), 5, 5,
-            Resources::CharacterTextures[0].get(), &mCamera
-            )
-        });
-    /* Actor Initialize() should before Batch Initialize() */
-    mSampleImg3D->Initialize(md3dDevice.Get(), mCommandList.Get(),
-        mAllRenderItems);
-    mCharBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
-
     
     BuildRootSignature();
 	BuildDescriptorHeaps();
     BuildShadersAndInputLayout();
     BuildShapeGeometry();
 	BuildMaterials();
+    
     BuildScene();
+    /* Actor Initialize() should before Batch Initialize() */
+    mCharBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+    
     BuildFrameResources();
     BuildPSOs();
 
@@ -1019,24 +1010,24 @@ void CameraAndDynamicIndexingApp::BuildNPCs()
 {
     const float SCALE = 1;
     
-    auto npc = std::make_unique<Actor>(
-           std::vector<std::shared_ptr<IComponent>> {
-               std::make_unique<ModelRenderer3D>("./Models/lu/lu.fbx",
-                   mMaterials["stone0"].get()),
-               std::make_shared<Transform>(
-                   XMFLOAT3 {0, 0, 0},
-                   XMFLOAT3 {SCALE, SCALE, SCALE}),
-               std::make_shared<StoryTeller>(
-                   mPlayer2.get(),
-                   std::vector<ImageBase*> {
-                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(0).get()),
-                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(1).get()),
-                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(2).get()),
-                       dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(3).get())
-                   })
-           }
-       );
-    mSceneActors.push_back(std::move(npc));
+    // auto npc = std::make_unique<Actor>(
+    //        std::vector<std::shared_ptr<IComponent>> {
+    //            std::make_unique<ModelRenderer3D>("./Models/lu/lu.fbx",
+    //                mMaterials["stone0"].get()),
+    //            std::make_shared<Transform>(
+    //                XMFLOAT3 {0, 0, 0},
+    //                XMFLOAT3 {SCALE, SCALE, SCALE}),
+    //            std::make_shared<StoryTeller>(
+    //                mPlayer2.get(),
+    //                std::vector<ImageBase*> {
+    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(0).get()),
+    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(1).get()),
+    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(2).get()),
+    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(3).get())
+    //                })
+    //        }
+    //    );
+    // mSceneActors.push_back(std::move(npc));
 
     
     auto npc2 = std::make_unique<Actor>(
@@ -1053,6 +1044,21 @@ void CameraAndDynamicIndexingApp::BuildNPCs()
 
 void CameraAndDynamicIndexingApp::BuildScene()
 {
+    auto sampleToy = std::make_unique<Actor>(
+        std::vector<std::shared_ptr<IComponent>> {
+            std::make_unique<Transform>(
+                XMFLOAT3 {0, 1, 0},
+                XMFLOAT3 {1, 1, 1},
+                XMFLOAT3 {0, 0, 0}
+                ),
+            std::make_unique<ImageRender3D>(
+                mCharBatch.get(), 5, 5,
+                Resources::CharacterTextures[0].get(), &mCamera
+                ),
+            std::make_unique<AlwaysFaceTarget>(mPlayer2.get())
+        });
+    mSceneActors.push_back(std::move(sampleToy));
+    
 	BuildNPCs();
     BuildPlane();
     BuildGrassLand();

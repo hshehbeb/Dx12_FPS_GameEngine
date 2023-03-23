@@ -53,6 +53,12 @@ void PlayerMovement::Update(Actor* owner)
 void PlayerMovement::Initialize(ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
 {
+    Transform* trans;
+    if (owner->TryGetComponent(&trans))
+    {
+        trans->SetPosition(mCamera.GetPosition3f());
+        trans->SetRotation(mCamera.GetRotation().EulerAngle);
+    }
 }
 
 void PlayerMovement::MoveFwd()

@@ -16,6 +16,23 @@ float ActorUtilis::DistanceBetweenActors(Actor* actor1, Actor* actor2)
     return distance;
 }
 
+float MathHelpers::AngleOf2Vector2D(XMFLOAT2 vec1, XMFLOAT2 vec2)
+{
+    float dotProduct = DotProduct(vec1, vec2);
+    float crossProductZ = vec1.x * vec2.y - vec1.y * vec2.x;
+    float clockwiseSign = crossProductZ / abs(crossProductZ);
+    
+    float magVec1 = Magnitude(vec1);
+    float magVec2 = Magnitude(vec2);
+
+    return clockwiseSign * acos(dotProduct / (magVec1 * magVec2));
+}
+
+void ActorUtilis::ThrowRequireCompException(const char* compName)
+{
+    throw std::exception(compName);
+}
+
 void Dx12Helpers::BuildPSO(
     ID3D12Device* device,
     std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout,
@@ -47,4 +64,24 @@ void Dx12Helpers::BuildPSO(
     ThrowIfFailed(device->CreateGraphicsPipelineState(
         &psoDesc, IID_PPV_ARGS(&resultPSO))
     );
+}
+
+float MathHelpers::Magnitude(XMFLOAT2 vec2D)
+{
+    return sqrt(vec2D.x * vec2D.x + vec2D.y * vec2D.y); 
+}
+
+float MathHelpers::DotProduct(XMFLOAT2 vec1, XMFLOAT2 vec2)
+{
+    return vec1.x * vec2.x + vec1.y * vec2.y;
+}
+
+XMFLOAT2 MathHelpers::Minus(XMFLOAT2 vec1, XMFLOAT2 vec2)
+{
+    return XMFLOAT2 {vec1.x - vec2.x, vec1.y - vec2.y};
+}
+
+XMFLOAT3 MathHelpers::Minus(XMFLOAT3 vec1, XMFLOAT3 vec2)
+{
+    return XMFLOAT3 {vec1.x - vec2.x, vec1.y - vec2.y, vec1.z - vec2.z};
 }

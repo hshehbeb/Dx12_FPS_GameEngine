@@ -7,6 +7,19 @@
 namespace ActorUtilis
 {
     float DistanceBetweenActors(Actor* actor1, Actor* actor2);
+    // XMFLOAT3 FaceAtRotation(Actor* src, Actor* dst);
+    void ThrowRequireCompException(const char* compName);
+}
+
+namespace MathHelpers
+{
+    float AngleOf2Vector2D(XMFLOAT2 vec1, XMFLOAT2 vec2);
+    // XMFLOAT3 EulerAngleOf2Vector3D(XMFLOAT3 vec1, XMFLOAT3 vec2);
+    float Magnitude(XMFLOAT2 vec2D);
+    float DotProduct(XMFLOAT2 vec1, XMFLOAT2 vec2);
+    // XMFLOAT2 CrossProduct(XMFLOAT2 vec1, XMFLOAT2 vec2);
+    XMFLOAT2 Minus(XMFLOAT2 vec1, XMFLOAT2 vec2);
+    XMFLOAT3 Minus(XMFLOAT3 vec1, XMFLOAT3 vec2);
 }
 
 namespace Dx12Helpers
