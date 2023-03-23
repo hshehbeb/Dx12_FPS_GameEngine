@@ -2,11 +2,9 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <memory>
-#include <vector>
 #include <wrl/client.h>
 
 #include "../../../../Common/UploadBuffer.h"
-#include "../../DataStructures/ScreenSpacePoint.h"
 #include "../BatchProcess/IBatchable.h"
 
 struct MeshGeometry;
@@ -29,9 +27,10 @@ public:
     void Draw(ID3D12GraphicsCommandList* cmdList) override;
     void Update() override;
 
-private:
+protected:
     std::unique_ptr<MeshGeometry> mQuadGeom;
     
+private:
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
     Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr;
     std::unique_ptr<UploadBuffer<ConstantBuffer>> mConstantBuffer = nullptr;
@@ -39,7 +38,9 @@ private:
 
 protected:
     virtual DirectX::XMFLOAT4X4 CalculateMVPMatrix() const = 0;
+
+private:
     void BuildDescriptorHeap(ID3D12Device& device);
     void BuildConstantBuffer(ID3D12Device& device);
-    void BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList);
+    void BuildQuadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 };

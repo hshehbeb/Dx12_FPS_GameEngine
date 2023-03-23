@@ -22,7 +22,7 @@ void ImageBase::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdL
     // LoadTexture(&device, &cmdList);
     BuildDescriptorHeap(*device);
     BuildConstantBuffer(*device);
-    BuildQuadGeometry(*device, *cmdList);
+    BuildQuadGeometry(device, cmdList);
 }
 
 void ImageBase::BuildDescriptorHeap(ID3D12Device& device)
@@ -80,7 +80,7 @@ void ImageBase::BuildConstantBuffer(ID3D12Device& device)
         );
 }
 
-void ImageBase::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandList& cmdList)
+void ImageBase::BuildQuadGeometry(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
     DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(DirectX::Colors::White);
     std::array<Vertex, 4> vertices =
@@ -109,12 +109,12 @@ void ImageBase::BuildQuadGeometry(ID3D12Device& device, ID3D12GraphicsCommandLis
     ThrowIfFailed(D3DCreateBlob(ibByteSize, &mQuadGeom->IndexBufferCPU));
     CopyMemory(mQuadGeom->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-    mQuadGeom->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(&device,
-                                                              &cmdList, vertices.data(), vbByteSize,
+    mQuadGeom->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(device,
+                                                              cmdList, vertices.data(), vbByteSize,
                                                               mQuadGeom->VertexBufferUploader);
 
-    mQuadGeom->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(&device,
-                                                             &cmdList, indices.data(), ibByteSize,
+    mQuadGeom->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(device,
+                                                             cmdList, indices.data(), ibByteSize,
                                                              mQuadGeom->IndexBufferUploader);
 
     mQuadGeom->VertexByteStride = sizeof(Vertex);

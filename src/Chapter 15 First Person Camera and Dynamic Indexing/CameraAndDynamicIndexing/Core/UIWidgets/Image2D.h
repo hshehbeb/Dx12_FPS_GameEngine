@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "ImageBase.h"
+#include "../../DataStructures/ScreenSpacePoint.h"
 
 class Image2D : public ImageBase
 {

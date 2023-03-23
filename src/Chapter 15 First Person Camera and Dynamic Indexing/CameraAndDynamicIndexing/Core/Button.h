@@ -2,7 +2,6 @@
 #include <functional>
 #include <memory>
 
-#include "../Core/BatchProcess/BatchBase.h"
 #include "../DataStructures/ScreenSpacePoint.h"
 #include "UIWidgets/ImageBase.h"
 
