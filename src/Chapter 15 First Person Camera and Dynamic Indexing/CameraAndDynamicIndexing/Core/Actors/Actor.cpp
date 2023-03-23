@@ -9,7 +9,7 @@ void Actor::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
 {
     for (auto& comp : mComponents)
     {
-        comp->Initialize(device, cmdList, rItemsList);
+        comp->Initialize(device, cmdList, rItemsList, this);
     }
 }
 

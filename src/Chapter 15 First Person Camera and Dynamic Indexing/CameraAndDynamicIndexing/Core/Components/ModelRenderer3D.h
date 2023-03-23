@@ -12,7 +12,9 @@ public:
     ModelRenderer3D(std::string loadPath, Material* material);
     ~ModelRenderer3D() = default;
 
-    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList) override;
+    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
+        RenderItemsList& rItemsList, Actor* owner) override;
+    
     void Update(Actor* owner) override;
 
 private:

@@ -21,7 +21,8 @@ void StoryTeller::Update(Actor* owner)
     }
 }
 
-void StoryTeller::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList)
+void StoryTeller::Initialize(ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
 {
 }
 

@@ -10,7 +10,8 @@ ModelRenderer3D::ModelRenderer3D(std::string loadPath, Material* material)
 {
 }
 
-void ModelRenderer3D::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList)
+void ModelRenderer3D::Initialize(ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
 {
     LoadModel(device, cmdList);
 

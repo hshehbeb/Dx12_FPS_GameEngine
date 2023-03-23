@@ -50,7 +50,8 @@ void PlayerMovement::Update(Actor* owner)
     mMoveDirectionThisFrame = {};
 }
 
-void PlayerMovement::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList)
+void PlayerMovement::Initialize(ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
 {
 }
 

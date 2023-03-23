@@ -13,6 +13,7 @@
 #include "Core/Actors/Actor.h"
 #include "Core/BatchProcess/AnythingBatch.h"
 #include "Core/Components/GravitySimulator.h"
+#include "Core/Components/ImageRender3D.h"
 #include "Core/Components/ModelRenderer3D.h"
 #include "Core/Components/PlayerMovement.h"
 #include "Core/Components/StoryTeller.h"
@@ -120,7 +121,7 @@ private:
     EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
     EfficientLookup<std::shared_ptr<IBatchable>>  mImagesRegistry;
 
-    Transform* mSampleImg3D;
+    Actor* mSampleImg3D;
 
     POINT mLastMousePos;
     std::unique_ptr<Actor> mPlayer2;
@@ -279,15 +280,23 @@ bool CameraAndDynamicIndexingApp::Initialize()
             L"Shaders\\vet_stdUnlit.hlsl",
             L"Shaders\\pxl_stdUnlit.hlsl"
         });
-    mSampleImg3D = new Transform(
-        {1, 1, 1}, {1, 1, 1}, {0, 0, 0}
-        ); 
-    mCharBatch->Add(std::make_shared<Image3D>(
-        5, 5, mSampleImg3D,
-        Resources::CharacterTextures[0].get(), &mCamera)
-        );
+    mSampleImg3D = new Actor({
+        std::make_unique<Transform>(
+            XMFLOAT3 {0, 1, 0},
+            XMFLOAT3 {1, 1, 1},
+            XMFLOAT3 {0, 0, 0}
+            ),
+        std::make_unique<ImageRender3D>(
+            mCharBatch.get(), 5, 5,
+            Resources::CharacterTextures[0].get(), &mCamera
+            )
+        });
+    /* Actor Initialize() should before Batch Initialize() */
+    mSampleImg3D->Initialize(md3dDevice.Get(), mCommandList.Get(),
+        mAllRenderItems);
     mCharBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
- 
+
+    
     BuildRootSignature();
 	BuildDescriptorHeaps();
     BuildShadersAndInputLayout();

@@ -212,6 +212,7 @@
     </ClCompile>
     <ClCompile Include="Core\BatchProcess\AnythingBatch.cpp" />
     <ClCompile Include="Core\Button.cpp" />
+    <ClCompile Include="Core\Components\ImageRender3D.cpp" />
     <ClCompile Include="Core\Components\ModelRenderer3D.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -582,6 +583,7 @@
     <ClInclude Include="Core\BatchProcess\IBatchable.h" />
     <ClInclude Include="Core\Button.h" />
     <ClInclude Include="Core\Components\IComponent.h" />
+    <ClInclude Include="Core\Components\ImageRender3D.h" />
     <ClInclude Include="Core\Components\ModelRenderer3D.h" />
     <ClInclude Include="Core\Components\PlayerMovement.h" />
     <ClInclude Include="Core\Components\GravitySimulator.h" />

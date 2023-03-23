@@ -58,7 +58,8 @@ void GravitySimulator::Update(Actor* owner)
     comp->MoveFree(translation);
 }
 
-void GravitySimulator::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList)
+void GravitySimulator::Initialize(ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
 {
 }
 

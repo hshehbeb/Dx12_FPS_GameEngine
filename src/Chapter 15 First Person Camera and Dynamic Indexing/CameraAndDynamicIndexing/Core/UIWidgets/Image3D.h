@@ -6,8 +6,7 @@
 #include "../Components/IComponent.h"
 
 /**
- * a component that rely on Transform to indicate
- * where to draw a given Image in the scene
+ * aims to render an image within the world
  */
 class Image3D : public ImageBase
 {

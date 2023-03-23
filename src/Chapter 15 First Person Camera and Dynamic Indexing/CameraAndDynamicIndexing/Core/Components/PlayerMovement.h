@@ -14,7 +14,8 @@ public:
     PlayerMovement(Camera& camera, float&& moveSpeed = 0.005f, float&& jumpSpeed = 0.005f);
     
     virtual void Update(Actor* owner) override;
-    virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList) override;
+    virtual void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
+        RenderItemsList& rItemsList, Actor* owner) override;
 
     void MoveFwd();
     void MoveBwd();

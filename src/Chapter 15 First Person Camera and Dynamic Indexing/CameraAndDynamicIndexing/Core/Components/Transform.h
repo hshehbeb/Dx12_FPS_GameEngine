@@ -11,7 +11,9 @@ public:
         XMFLOAT3 rot = {MathHelper::Pi / 2, 0, 0}
     );
 
-    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList) override;
+    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
+        RenderItemsList& rItemsList, Actor* owner) override;
+    
     void Update(Actor* owner) override;
 
     void SetPosition(XMFLOAT3 newPos);
