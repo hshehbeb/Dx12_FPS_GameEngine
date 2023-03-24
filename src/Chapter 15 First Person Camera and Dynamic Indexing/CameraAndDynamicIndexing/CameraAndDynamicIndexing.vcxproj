@@ -212,6 +212,7 @@
     </ClCompile>
     <ClCompile Include="Core\BatchProcess\AnythingBatch.cpp" />
     <ClCompile Include="Core\Button.cpp" />
+    <ClCompile Include="Core\ChineseCharactersLoader.cpp" />
     <ClCompile Include="Core\Components\AlwaysFaceTarget.cpp" />
     <ClCompile Include="Core\Components\ImageRender3D.cpp" />
     <ClCompile Include="Core\Components\ModelRenderer3D.cpp">
@@ -583,6 +584,7 @@
     <ClInclude Include="Core\BatchProcess\AnythingBatch.h" />
     <ClInclude Include="Core\BatchProcess\IBatchable.h" />
     <ClInclude Include="Core\Button.h" />
+    <ClInclude Include="Core\ChineseCharactersLoader.h" />
     <ClInclude Include="Core\Components\AlwaysFaceTarget.h" />
     <ClInclude Include="Core\Components\IComponent.h" />
     <ClInclude Include="Core\Components\ImageRender3D.h" />

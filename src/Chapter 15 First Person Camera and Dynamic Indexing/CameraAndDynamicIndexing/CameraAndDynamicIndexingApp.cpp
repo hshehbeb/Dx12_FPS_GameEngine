@@ -65,6 +65,7 @@ private:
 	void UpdateMainPassCB(const GameTimer& gt);
 
     void InitButtons();
+    void PrintFirstNCharacters(int printCount);
     void InitImages();
     void LoadTextures();
     void BuildRootSignature();
@@ -190,29 +191,24 @@ void CameraAndDynamicIndexingApp::InitButtons()
     }
 }
 
+void CameraAndDynamicIndexingApp::PrintFirstNCharacters(const int printCount)
+{
+    const int TOTAL_COLS = 10, TOTAL_ROWS = printCount / TOTAL_COLS, GRID_SIZE = 50;
+    for (int row = 0; row < TOTAL_ROWS; row++)
+        for (int col = 0; col < TOTAL_COLS; col++)
+            mImagesRegistry.Add(std::make_shared<Image2D>(
+                ScreenSpacePoint {col * GRID_SIZE, row * GRID_SIZE},
+                GRID_SIZE, GRID_SIZE,
+                Resources::CnCharLoader.GetByIndex(row * TOTAL_COLS + col))
+            );
+}
+
 void CameraAndDynamicIndexingApp::InitImages()
 {
-    /* start up characters */
-    mImagesRegistry.Add(std::make_shared<Image2D>(
-            ScreenSpacePoint {100, 100},
-            100, 100,
-            Resources::CharacterTextures[0].get())
-            );
-    mImagesRegistry.Add(std::make_shared<Image2D>(
-        ScreenSpacePoint {200, 100},
-        100, 100,
-        Resources::CharacterTextures[1].get())
-        );
-    mImagesRegistry.Add(std::make_shared<Image2D>(
-        ScreenSpacePoint {300, 100},
-        100, 100,
-        Resources::CharacterTextures[2].get())
-        );
-    mImagesRegistry.Add(std::make_shared<Image2D>(
-        ScreenSpacePoint {400, 100},
-        100, 100,
-        Resources::CharacterTextures[3].get())
-        );
+    const int printCount = 30;
+    Resources::CnCharLoader.Load(printCount, md3dDevice.Get(), mCommandList.Get());
+
+    PrintFirstNCharacters(printCount);
 
     /* player body */
     mImagesRegistry.Add(std::make_shared<Image2D>(
@@ -253,8 +249,6 @@ bool CameraAndDynamicIndexingApp::Initialize()
     );
     mPlayer2->Initialize(md3dDevice.Get(), mCommandList.Get(),
         mAllRenderItems);
-    
-    // BuildScene();
     
 	LoadTextures();
     
@@ -653,19 +647,6 @@ void CameraAndDynamicIndexingApp::LoadTextures()
 	Resources::RegularTextures[crateTex->Name] = std::move(crateTex);
 	Resources::RegularTextures[playerBodyTex->Name] = std::move(playerBodyTex);
 	Resources::RegularTextures[crosshairsTex->Name] = std::move(crosshairsTex);
-
-    for (int i = 0; i < Resources::AvailableCharactersCount; i++)
-    {
-        auto charTex = std::make_unique<Texture>();
-        charTex->Name = std::string("charTex") + std::to_string(i);
-        charTex->Filename = L"../../Textures/uncompressed.dds";
-        ThrowIfFailed(::CreateDDSTextureForNextChar(
-            md3dDevice.Get(), mCommandList.Get(), charTex->Filename.c_str(),
-            charTex->Resource, charTex->UploadHeap)
-        );
-        Resources::CharacterTextures[i] = std::move(charTex);
-    }
-
 }
 
 void CameraAndDynamicIndexingApp::BuildRootSignature()
@@ -1053,7 +1034,7 @@ void CameraAndDynamicIndexingApp::BuildScene()
                 ),
             std::make_unique<ImageRender3D>(
                 mCharBatch.get(), 5, 5,
-                Resources::CharacterTextures[0].get(), &mCamera
+                Resources::CnCharLoader.GetByIndex(0), &mCamera
                 ),
             std::make_unique<AlwaysFaceTarget>(mPlayer2.get())
         });
