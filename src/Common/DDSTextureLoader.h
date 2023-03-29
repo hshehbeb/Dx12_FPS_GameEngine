@@ -30,6 +30,8 @@
 #pragma warning(disable : 4005)
 #include <stdint.h>
 
+#include "../Chapter 15 First Person Camera and Dynamic Indexing/CameraAndDynamicIndexing/DataStructures/ChineseChar.h"
+
 #pragma warning(pop)
 
 #if defined(_MSC_VER) && (_MSC_VER<1610) && !defined(_In_reads_)
@@ -172,6 +174,17 @@ namespace DirectX
 }
 
 HRESULT CreateDDSTextureForNextChar(
+    _In_ ID3D12Device* device,                      
+    _In_ ID3D12GraphicsCommandList* cmdList,        
+    _In_z_ const wchar_t* szFileName,               
+    _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& texture,          
+    _Out_ Microsoft::WRL::ComPtr<ID3D12Resource>& textureUploadHeap,
+    _In_ size_t maxsize = 0,
+    _Out_opt_ DirectX::DDS_ALPHA_MODE* alphaMode = nullptr
+);
+
+HRESULT CreateDDSTextureForCnChar(
+    _In_ const ChineseChar& theChar,
     _In_ ID3D12Device* device,                      
     _In_ ID3D12GraphicsCommandList* cmdList,        
     _In_z_ const wchar_t* szFileName,               

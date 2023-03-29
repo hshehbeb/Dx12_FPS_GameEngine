@@ -569,6 +569,9 @@
     </ClCompile>
     <ClCompile Include="Core\Utilis\UtilisFunctionLibery.cpp" />
     <ClCompile Include="FrameResource.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="ScriptParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Common\Camera.h" />
@@ -602,6 +605,7 @@
     <ClInclude Include="Core\UIWidgets\ImageBase.h" />
     <ClInclude Include="Core\UIWidgets\Image3D.h" />
     <ClInclude Include="Core\Utilis\UtilisFunctionLibery.h" />
+    <ClInclude Include="DataStructures\ChineseChar.h" />
     <ClInclude Include="DataStructures\EfficientLookup.h" />
     <ClInclude Include="DataStructures\RenderItem.h" />
     <ClInclude Include="DataStructures\RenderItemsList.h" />
@@ -611,6 +615,11 @@
     <ClInclude Include="DataStructures\WorldSpacePoint.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Resources.h" />
+    <ClInclude Include="Script.h" />
+    <ClInclude Include="ScriptParser.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Script.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

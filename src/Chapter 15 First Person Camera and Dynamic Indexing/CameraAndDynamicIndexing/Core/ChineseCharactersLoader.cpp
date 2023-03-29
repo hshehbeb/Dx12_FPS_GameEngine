@@ -1,4 +1,7 @@
 ﻿#include "ChineseCharactersLoader.h"
+#include "../../../Common/DDSTextureLoader.h"
+
+struct DDS_HEADER;
 
 void ChineseCharactersLoader::Load(int loadCount, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
@@ -14,6 +17,19 @@ void ChineseCharactersLoader::Load(int loadCount, ID3D12Device* device, ID3D12Gr
         
         mCharTexList_Opaque.push_back(std::move(charTex));
     }
+}
+
+void ChineseCharactersLoader::LoadCharacter(ChineseChar cnChar, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+{
+    auto charTex = std::make_unique<Texture>();
+    charTex->Name = std::string("charTex") + std::to_string( rand() );
+    charTex->Filename = L"../../Textures/uncompressed.dds";
+    ThrowIfFailed(::CreateDDSTextureForCnChar(
+        cnChar, device, cmdList, charTex->Filename.c_str(),
+        charTex->Resource, charTex->UploadHeap)
+    );
+        
+    mCharTexList_Opaque.push_back(std::move(charTex));
 }
 
 Texture* ChineseCharactersLoader::GetByIndex(int idx)

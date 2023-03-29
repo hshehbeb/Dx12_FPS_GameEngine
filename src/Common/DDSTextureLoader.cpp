@@ -2241,13 +2241,115 @@ HRESULT CreateDDSTextureForNextChar(
     return hr;
 }
 
+void ReadFromChineseChar(const ChineseChar& theChar,
+    DDS_HEADER* header, _Out_ uint8_t* bitData)
+{
+    using namespace std;
+    
+    // char HzkC[1000];
+    // ifstream in("MyStr.txt");
+    // if (!in.is_open())
+        // exit(1);
+    
+    // in.get(HzkC,1000);
+    
+    // static int next = 0;
+    
+    char buffer2[128];
+    // char* a = HzkC + next;
+    // next += 2;
+    unsigned char qh, wh;
+    unsigned long offset;
+    FILE* HZK;
+
+    if (fopen_s(&HZK, "hzk32", "rb")) {
+        printf("Can't open haz16, Please add it?");
+        _getch();
+        exit(0);
+    }
+    
+    qh = theChar.GetFirstHalve()  - 0xa0;
+    wh = theChar.GetSecondHalve() - 0xa0;
+    offset = (94 * (qh - 1) + (wh - 1)) * 128L;
+    fseek(HZK, offset, SEEK_SET);
+    fread(buffer2, 128, 1, HZK);
+
+    for (int i = 0; i < 32; i++)
+    {
+        for (int j = 0; j < 4; j++)
+            for (int k = 0; k < 8; k++)
+                if (buffer2[i * 4 + j] & (0x80 >> k))
+                {
+                    int m_row_size = 4ul * ((4 * header->width + 4ul - 1ul) / 4ul);
+                    int index = i * m_row_size + (j * 8 + k) * 4;
+                    *(bitData + index) = 255;
+                    *(bitData + index + 1) = 255;
+                    *(bitData + index + 2) = 255;
+                    *(bitData + index + 3) = 255;
+                }
+    }
+}
+
+HRESULT CreateDDSTextureForCnChar(
+    const ChineseChar& theChar,
+    ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList,
+    const wchar_t* szFileName,
+    ComPtr<ID3D12Resource>& texture,
+    ComPtr<ID3D12Resource>& textureUploadHeap,
+    size_t maxsize,
+    DDS_ALPHA_MODE* alphaMode)
+{
+    if (texture)
+    {
+        texture = nullptr;
+    }
+    if (textureUploadHeap)
+    {
+        textureUploadHeap = nullptr;
+    }
+    if (alphaMode)
+    {
+        *alphaMode = DDS_ALPHA_MODE_UNKNOWN;
+    }
+
+    if (!device || !szFileName)
+    {
+        return E_INVALIDARG;
+    }
+
+    DDS_HEADER* header = nullptr;
+    uint8_t* bitData = nullptr;
+    size_t bitSize = 0;
+
+    std::unique_ptr<uint8_t[]> ddsData;
+    HRESULT hr = LoadTextureDataFromFile(szFileName, ddsData, &header, &bitData, &bitSize);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+    
+    ReadFromChineseChar(theChar, header, bitData);
+    
+    hr = CreateTextureFromDDS12(device, cmdList, header,
+        bitData, bitSize, maxsize, false, texture, textureUploadHeap);
+
+    if (SUCCEEDED(hr))
+    {
+        if (alphaMode)
+            *alphaMode = GetAlphaMode(header);
+    }
+
+    return hr;
+}
+
 HRESULT DirectX::CreateDDSTextureFromFile12(_In_ ID3D12Device* device,
-	_In_ ID3D12GraphicsCommandList* cmdList,
-	_In_z_ const wchar_t* szFileName,
-	_Out_ ComPtr<ID3D12Resource>& texture,
-	_Out_ ComPtr<ID3D12Resource>& textureUploadHeap,
-	_In_ size_t maxsize,
-	_Out_opt_ DDS_ALPHA_MODE* alphaMode)
+                                            _In_ ID3D12GraphicsCommandList* cmdList,
+                                            _In_z_ const wchar_t* szFileName,
+                                            _Out_ ComPtr<ID3D12Resource>& texture,
+                                            _Out_ ComPtr<ID3D12Resource>& textureUploadHeap,
+                                            _In_ size_t maxsize,
+                                            _Out_opt_ DDS_ALPHA_MODE* alphaMode)
 {
 	if (texture)
 	{

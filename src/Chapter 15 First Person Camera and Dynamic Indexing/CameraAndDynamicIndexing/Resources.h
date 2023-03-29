@@ -2,12 +2,13 @@
 #include "../../Common/d3dUtil.h"
 #include "Core/ChineseCharactersLoader.h"
 
+
 namespace Resources
 {
     typedef std::unordered_map<std::string, std::unique_ptr<Texture>> t_TextureLookup;
     
-    static t_TextureLookup RegularTextures {};
-    static ChineseCharactersLoader CnCharLoader {};
+    extern t_TextureLookup RegularTextures;
+    extern ChineseCharactersLoader CnCharLoader;
     
 /**
  * to use a handy LoadTexture macro to eliminate writing boilerplate,

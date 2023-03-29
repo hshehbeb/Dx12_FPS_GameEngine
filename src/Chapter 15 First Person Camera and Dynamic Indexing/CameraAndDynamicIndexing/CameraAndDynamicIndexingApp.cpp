@@ -8,6 +8,7 @@
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
+#include "ScriptParser.h"
 #include "Core/Button.h"
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
@@ -193,11 +194,16 @@ void CameraAndDynamicIndexingApp::InitButtons()
 
 void CameraAndDynamicIndexingApp::PrintFirstNCharacters(const int printCount)
 {
-    const int TOTAL_COLS = 10, TOTAL_ROWS = printCount / TOTAL_COLS, GRID_SIZE = 50;
+    const int TOTAL_COLS = 10, GRID_SIZE = 50;
+    const int TOTAL_ROWS = std::ceil((float)printCount / TOTAL_COLS);
+    
     for (int row = 0; row < TOTAL_ROWS; row++)
-        for (int col = 0; col < TOTAL_COLS; col++)
+        for (int col = 0; col < std::fmin(printCount, TOTAL_COLS); col++)
             mImagesRegistry.Add(std::make_shared<Image2D>(
-                ScreenSpacePoint {col * GRID_SIZE, row * GRID_SIZE},
+                ScreenSpacePoint {
+                    static_cast<int>(GRID_SIZE * 0.5 + col * GRID_SIZE),
+                    static_cast<int>(GRID_SIZE * 0.5 + row * GRID_SIZE)
+                    },
                 GRID_SIZE, GRID_SIZE,
                 Resources::CnCharLoader.GetByIndex(row * TOTAL_COLS + col))
             );
@@ -205,11 +211,17 @@ void CameraAndDynamicIndexingApp::PrintFirstNCharacters(const int printCount)
 
 void CameraAndDynamicIndexingApp::InitImages()
 {
-    const int printCount = 30;
-    Resources::CnCharLoader.Load(printCount, md3dDevice.Get(), mCommandList.Get());
+    ScriptParser parser {};
+    parser.Parse("Script.json");
+    parser.LoadTextureOfAllCharacters(md3dDevice.Get(), mCommandList.Get());
+    
+    PrintFirstNCharacters(3);
 
-    PrintFirstNCharacters(printCount);
-
+    // const int printCount = 30;
+    // Resources::CnCharLoader.Load(printCount, md3dDevice.Get(), mCommandList.Get());
+    //
+    // PrintFirstNCharacters(printCount);
+    
     /* player body */
     mImagesRegistry.Add(std::make_shared<Image2D>(
         ScreenSpacePoint {630, 520},
