@@ -67,8 +67,15 @@ private:
 	void UpdateMainPassCB(const GameTimer& gt);
 
     void InitButtons();
+    void LoadPlayerAndCamera();
+    // void LoadPlayerAndCamera();
     // void PrintFirstNCharacters(int printCount);
-    void InitImages();
+    // void InitImages();
+    void LoadActors();
+    void CreateBatches();
+    void RegisterDialogHandle();
+    void LoadMenuButtons();
+    void InitBatches();
     void LoadTextures();
     void BuildRootSignature();
 	void BuildDescriptorHeaps();
@@ -120,11 +127,11 @@ private:
     // std::unique_ptr<AxisIndicator> mAxisIndicator;
     std::unique_ptr<AnythingBatch> mImageBatch;
     std::unique_ptr<AnythingBatch> mAxisIndicatorBatch;
-    std::unique_ptr<AnythingBatch> mCharBatch;
+    std::unique_ptr<AnythingBatch> m3DCharactersBatch;
     std::unique_ptr<AnythingBatch> m2DCharactersBatch;
     
     EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
-    EfficientLookup<std::shared_ptr<IBatchable>>  mImagesRegistry;
+    // EfficientLookup<std::shared_ptr<IBatchable>>  mImagesRegistry;
 
     // Actor* mSampleImg3D;
 
@@ -190,7 +197,7 @@ void CameraAndDynamicIndexingApp::InitButtons()
     
     for (auto& btn : mButtonsRegistry.GetValues())
     {
-        mImagesRegistry.Add(btn->image);
+        mImageBatch->Add(btn->image);
     }
 }
 
@@ -211,30 +218,120 @@ void CameraAndDynamicIndexingApp::InitButtons()
 //             );
 // }
 
-void CameraAndDynamicIndexingApp::InitImages()
-{
-    // scripter.ShowDialog(0, m2DCharactersBatch.get(), {});
-    
-    // PrintFirstNCharacters(3);
+// void CameraAndDynamicIndexingApp::InitImages()
+// {
+//     
+//     // PrintFirstNCharacters(3);
+//
+//     // const int printCount = 30;
+//     // Resources::CnCharLoader.Load(printCount, md3dDevice.Get(), mCommandList.Get());
+//     //
+//     // PrintFirstNCharacters(printCount);
+//     
+//     
+// }
 
-    // const int printCount = 30;
-    // Resources::CnCharLoader.Load(printCount, md3dDevice.Get(), mCommandList.Get());
-    //
-    // PrintFirstNCharacters(printCount);
+void CameraAndDynamicIndexingApp::LoadPlayerAndCamera()
+{
+    mCamera.SetPosition(0.0f, 2.0f, -10.0f);
     
+    mPlayer2 = std::make_unique<Actor>(
+        std::vector<std::shared_ptr<IComponent>> {
+            std::make_shared<PlayerMovement>(mCamera),
+            std::make_shared<GravitySimulator>(),
+            std::make_shared<Transform>()
+        }
+    );
+    mPlayer2->Initialize(md3dDevice.Get(), mCommandList.Get(),
+                         mAllRenderItems);
+
     /* player body */
-    mImagesRegistry.Add(std::make_shared<Image2D>(
+    mImageBatch->Add(std::make_shared<Image2D>(
         ScreenSpacePoint {630, 520},
         300, 300,
         Resources::RegularTextures["playerTex"].get())
         );
 
     /* crosshairs */
-    mImagesRegistry.Add(std::make_shared<Image2D>(
+    mImageBatch->Add(std::make_shared<Image2D>(
         ScreenSpacePoint {400, 300},
         30, 30,
         Resources::RegularTextures["crosshairsTex"].get())
         );
+}
+
+void CameraAndDynamicIndexingApp::LoadActors()
+{
+    LoadPlayerAndCamera();
+    LoadMenuButtons();
+}
+
+void CameraAndDynamicIndexingApp::CreateBatches()
+{
+    m2DCharactersBatch =
+        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
+            L"Shaders\\vet_renderer2d.hlsl",
+            L"Shaders\\pxl_renderer2d.hlsl"
+        });
+    mAxisIndicatorBatch =
+        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
+            L"Shaders\\vet_renderer2d.hlsl",
+            L"Shaders\\pxl_renderer2d.hlsl"
+        });
+    mAxisIndicatorBatch->Add(std::make_shared<AxisIndicator>(
+            ScreenSpacePoint {70, 550}, 50, 50, &mCamera)
+    );
+    m3DCharactersBatch =
+        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
+            L"Shaders\\vet_stdUnlit.hlsl",
+            L"Shaders\\pxl_stdUnlit.hlsl"
+        });
+    mImageBatch =
+        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
+            L"Shaders\\vet_renderer2d.hlsl",
+            L"Shaders\\pxl_renderer2d.hlsl"
+        });
+}
+
+void CameraAndDynamicIndexingApp::RegisterDialogHandle()
+{
+    Resources::gScripter.Parse("Script.json");
+    Resources::gScripter.Initialize(md3dDevice.Get(), mCommandList.Get());
+    Resources::gScripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
+}
+
+void CameraAndDynamicIndexingApp::LoadMenuButtons()
+{
+    mButtonsRegistry.Add("btn_PauseGame", std::make_shared<Button>(
+                             ScreenSpacePoint {100, 500}, 100, 50,
+                             Resources::RegularTextures["PauseGame"].get(),
+                             [&](ScreenSpacePoint p){
+                                 mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(true);
+                                 mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(false);
+                             })
+    );
+    mButtonsRegistry.Add("btn_ContinueGame", std::make_shared<Button>(
+                             ScreenSpacePoint {400, 300}, 100, 50,
+                             Resources::RegularTextures["ContinueGame"].get(),
+                             [&](ScreenSpacePoint p){
+                                 mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
+                                 mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(true);
+                             })
+    );
+    mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
+    for (auto& btn : mButtonsRegistry.GetValues())
+    {
+        mImageBatch->Add(btn->image);
+    }
+}
+
+void CameraAndDynamicIndexingApp::InitBatches()
+{
+    /* Actor Initialize() should before Batch Initialize() */
+    m2DCharactersBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+    mAxisIndicatorBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+    m3DCharactersBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
 }
 
 bool CameraAndDynamicIndexingApp::Initialize()
@@ -251,60 +348,13 @@ bool CameraAndDynamicIndexingApp::Initialize()
 	// so we have to query this information.
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	mCamera.SetPosition(0.0f, 2.0f, -10.0f);
-    mPlayer2 = std::make_unique<Actor>(
-        std::vector<std::shared_ptr<IComponent>> {
-            std::make_shared<PlayerMovement>(mCamera),
-            std::make_shared<GravitySimulator>(),
-            std::make_shared<Transform>()
-        }
-    );
-    mPlayer2->Initialize(md3dDevice.Get(), mCommandList.Get(),
-        mAllRenderItems);
     
 	LoadTextures();
-    
+    CreateBatches();
+	LoadActors();
+    RegisterDialogHandle();
 
-    m2DCharactersBatch =
-        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
-            L"Shaders\\vet_renderer2d.hlsl",
-            L"Shaders\\pxl_renderer2d.hlsl"
-        });
-
-    Scripter scripter {};
-    scripter.Parse("Script.json");
-    scripter.Initialize(md3dDevice.Get(), mCommandList.Get());
-    scripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
-    
-    InitImages();
-    InitButtons();
-    
-    mImageBatch =
-        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
-            L"Shaders\\vet_renderer2d.hlsl",
-            L"Shaders\\pxl_renderer2d.hlsl"
-        }, mImagesRegistry);
-    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
-    
-    mAxisIndicatorBatch =
-        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
-            L"Shaders\\vet_renderer2d.hlsl",
-            L"Shaders\\pxl_renderer2d.hlsl"
-        });
-    mAxisIndicatorBatch->Add(std::make_shared<AxisIndicator>(
-        ScreenSpacePoint {70, 550}, 50, 50, &mCamera)
-        );
-    mAxisIndicatorBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
-    
-
-    mCharBatch =
-        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
-            L"Shaders\\vet_stdUnlit.hlsl",
-            L"Shaders\\pxl_stdUnlit.hlsl"
-        });
-
-    m2DCharactersBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
-    
+    /* Legacy =BEGIN= */
     BuildRootSignature();
 	BuildDescriptorHeaps();
     BuildShadersAndInputLayout();
@@ -312,11 +362,17 @@ bool CameraAndDynamicIndexingApp::Initialize()
 	BuildMaterials();
     
     BuildScene();
-    /* Actor Initialize() should before Batch Initialize() */
-    mCharBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
     BuildFrameResources();
     BuildPSOs();
+    /* Legacy =END= */
+    
+    InitBatches();
+
+    
+    /* ShowDialog() should after Batch.Initialize() */
+    Resources::gScripter.ShowDialog(0, m2DCharactersBatch.get(), {});
+    
 
     // Execute the initialization commands.
     ThrowIfFailed(mCommandList->Close());
@@ -350,7 +406,7 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
     mAxisIndicatorBatch->UpdateAll();
     mImageBatch->UpdateAll();
     m2DCharactersBatch->UpdateAll();
-    mCharBatch->UpdateAll();
+    m3DCharactersBatch->UpdateAll();
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -427,7 +483,7 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
     mAxisIndicatorBatch->DrawAll(mCommandList.Get());
     mImageBatch->DrawAll(mCommandList.Get());
     m2DCharactersBatch->DrawAll(mCommandList.Get());
-    mCharBatch->DrawAll(mCommandList.Get());
+    m3DCharactersBatch->DrawAll(mCommandList.Get());
     
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
@@ -1062,7 +1118,7 @@ void CameraAndDynamicIndexingApp::BuildScene()
                 XMFLOAT3 {0, 0, 0}
                 ),
             std::make_unique<ImageRender3D>(
-                mCharBatch.get(), 5, 5,
+                m3DCharactersBatch.get(), 5, 5,
                 Resources::CnCharLoader.GetByIndex(0), &mCamera
                 ),
             std::make_unique<AlwaysFaceTarget>(mPlayer2.get())

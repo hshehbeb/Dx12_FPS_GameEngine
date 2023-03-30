@@ -3,12 +3,15 @@
 #include "Core/ChineseCharactersLoader.h"
 
 
+class Scripter;
+
 namespace Resources
 {
     typedef std::unordered_map<std::string, std::unique_ptr<Texture>> t_TextureLookup;
     
     extern t_TextureLookup RegularTextures;
     extern ChineseCharactersLoader CnCharLoader;
+    extern Scripter gScripter;
     
 /**
  * to use a handy LoadTexture macro to eliminate writing boilerplate,
