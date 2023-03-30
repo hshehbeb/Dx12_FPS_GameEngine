@@ -567,6 +567,7 @@
       <AdditionalIncludeDirectories>C:\Users\sherlock\Code\theirs\intro-to-dx12\src\Chapter 15 First Person Camera and Dynamic Indexing\CameraAndDynamicIndexing\/assimp;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Core\Utilis\Image2DPlacer.cpp" />
     <ClCompile Include="Core\Utilis\UtilisFunctionLibery.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="Resource.cpp" />
@@ -604,6 +605,7 @@
     <ClInclude Include="Core\UIWidgets\Image2D.h" />
     <ClInclude Include="Core\UIWidgets\ImageBase.h" />
     <ClInclude Include="Core\UIWidgets\Image3D.h" />
+    <ClInclude Include="Core\Utilis\Image2DPlacer.h" />
     <ClInclude Include="Core\Utilis\UtilisFunctionLibery.h" />
     <ClInclude Include="DataStructures\ChineseChar.h" />
     <ClInclude Include="DataStructures\EfficientLookup.h" />
