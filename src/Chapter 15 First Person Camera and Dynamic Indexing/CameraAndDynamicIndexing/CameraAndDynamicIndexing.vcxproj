@@ -571,7 +571,6 @@
     <ClCompile Include="Core\Utilis\UtilisFunctionLibery.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="Resources.cpp" />
-    <ClCompile Include="Script.cpp" />
     <ClCompile Include="Scripter.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -614,12 +613,12 @@
     <ClInclude Include="DataStructures\RenderItemsList.h" />
     <ClInclude Include="DataStructures\Rotation.h" />
     <ClInclude Include="DataStructures\ScreenSpacePoint.h" />
+    <ClInclude Include="DataStructures\TextCN.h" />
     <ClInclude Include="DataStructures\Vertex.h" />
     <ClInclude Include="DataStructures\WorldSpacePoint.h" />
     <ClInclude Include="DialogHandleFuncLibrary.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Resources.h" />
-    <ClInclude Include="Script.h" />
     <ClInclude Include="Scripter.h" />
   </ItemGroup>
   <ItemGroup>

@@ -15,19 +15,24 @@ namespace
      * where staging Image2Ds should be placed,
      * and hide from player's view
      */
-    ScreenSpacePoint STAGING_PLACE {2000, 2000};
+    // ScreenSpacePoint STAGING_PLACE {2000, 2000};
 }
 
 struct Scripter::ParseResult
 {
 private:
-    typedef std::unordered_map<int, std::vector<ChineseChar>> t_IdToCnChars;
+    typedef std::unordered_map<int, std::vector<ChineseChar>> t_DlgIdToCnChars;
+    typedef std::unordered_map<int, std::vector<int>> t_DlgIdToReplies;
+    typedef std::unordered_map<int, Json::Value> t_DlgToFormatConf;
 
 public:
     /**
      * dialog's id to its present characters map
      */
-    t_IdToCnChars ChineseCharacters {0};
+    t_DlgIdToCnChars ChineseCharacters;
+
+    t_DlgIdToReplies RepliesLookup;
+    t_DlgToFormatConf FormatLookup;
 };
 
 void Scripter::Parse(const char* filePath)
@@ -46,12 +51,13 @@ void Scripter::Parse(const char* filePath)
     }
 }
 
-void Scripter::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+void Scripter::Initialize(ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch)
 {
     if (!mParseResult)
         throw std::exception("Parse() should be called before Initialize()");
 
-    LoadAllDialogs(device, cmdList);
+    LoadAllDialogs(device, cmdList, imgBatch);
 }
 
 void Scripter::RegisterDialogHandle(int dlgIdx, t_DialogHandleFunc handleFunc)
@@ -59,46 +65,55 @@ void Scripter::RegisterDialogHandle(int dlgIdx, t_DialogHandleFunc handleFunc)
     mDlgIdToHandleFunc.insert_or_assign(dlgIdx, handleFunc);
 }
 
-void Scripter::LoadDialog(int dlgIdx, ID3D12Device* device,
-                          ID3D12GraphicsCommandList* cmdList, const std::vector<ChineseChar>& characters)
+void Scripter::LoadDialog(int dlgIdx, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
+    const std::vector<ChineseChar>& characters, AnythingBatch* imgBatch)
 {
-    std::vector<std::shared_ptr<Image2D>> textImages;
-    for (const ChineseChar& aChar : characters)
+    auto text = std::make_unique<TextCN>();
+    
+    for (int i = 0; i < characters.size(); i++)
     {
+        auto aChar = characters[i];
+        
         int idx = Resources::CnCharLoader.LoadCharacter(aChar, device, cmdList);
         Texture* tex = Resources::CnCharLoader.GetByIndex(idx);
 
-        auto img = std::make_shared<Image2D>(STAGING_PLACE, 50, 50, tex);
-        img->Initialize(device, cmdList);
+        auto x = mParseResult->FormatLookup[dlgIdx].get("x", 0);
+        auto y = mParseResult->FormatLookup[dlgIdx].get("y", 0);
+        auto size = mParseResult->FormatLookup[dlgIdx].get("size", 50);
+        auto img = std::make_shared<Image2D>(
+            ScreenSpacePoint {x.asInt() + i * size.asInt(), y.asInt()},
+            size.asInt(), size.asInt(), tex
+            );
         
-        textImages.push_back(img);
+        text->Images.push_back(img);
+        imgBatch->Add(img);
     }
     
-    mDlgIdToTextImgs.insert_or_assign(dlgIdx, std::move(textImages));
+    mDlgIdToText.insert_or_assign(dlgIdx, std::move(text));
 }
 
-void Scripter::ShowDialog(int dlgIdx, AnythingBatch* imgBatch,
-    const t_DialogHandleFuncParams& params)
+void Scripter::ShowDialog(int dlgIdx, const t_DialogHandleFuncParams& params)
 {
-    bool anyImgFound =
-        mDlgIdToTextImgs.find(dlgIdx) != mDlgIdToTextImgs.end();
-    if (!anyImgFound)
-        throw std::exception("Parse() & Initialize() should be called first");
-
-    std::vector<std::shared_ptr<IBatchable>> imgs {};
-    for (auto& img : mDlgIdToTextImgs[dlgIdx])
-    {
-        imgs.push_back(img);
-    }
-    imgBatch->AddRange(imgs);
-
-    
     bool anyHandleFound =
         mDlgIdToHandleFunc.find(dlgIdx) != mDlgIdToHandleFunc.end();
     if (!anyHandleFound) return;
 
     auto& handleFunc = mDlgIdToHandleFunc[dlgIdx];
-    handleFunc(imgs, params);
+    handleFunc(params);
+}
+
+TextCN* Scripter::GetTextOfDialog(int dlgIdx)
+{
+    bool found = (mDlgIdToText.find(dlgIdx) != mDlgIdToText.end());
+    if (!found)
+        throw std::exception("Parse() & Initialize() should be called first");
+    
+    return mDlgIdToText[dlgIdx].get();
+}
+
+std::vector<int>& Scripter::GetReplyIndices(int dlgIdx) const
+{
+    return mParseResult->RepliesLookup[dlgIdx];
 }
 
 void Scripter::ParseJsonObject(const Json::Value& jsonObj)
@@ -116,10 +131,14 @@ void Scripter::ParseDialog(const Json::Value& dlgJson)
     const char* say = dlgJson["say"].asCString();
     
     const Json::Value& replies = dlgJson["replies"];
+    std::vector<int> replyIdxs {};
     for (auto& reply : replies)
     {
+        replyIdxs.push_back(reply["id"].asInt());
+        
         ParseDialog(reply);
     }
+    mParseResult->RepliesLookup.insert_or_assign(id, replyIdxs);
 
     std::vector<ChineseChar> chars {};
     for (size_t i = 0; i < std::strlen(say); i += 2)
@@ -128,15 +147,20 @@ void Scripter::ParseDialog(const Json::Value& dlgJson)
         chars.push_back(aChar);
     }
     mParseResult->ChineseCharacters.insert_or_assign(id, chars);
+
+    mParseResult->FormatLookup.insert_or_assign(
+        id, dlgJson["format"] ? dlgJson["format"] : Json::Value {}
+        );
 }
 
-void Scripter::LoadAllDialogs(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+void Scripter::LoadAllDialogs(ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch)
 {
     for (const auto& pair : mParseResult->ChineseCharacters)
     {
         int dlgId = pair.first;
         const std::vector<ChineseChar>& chars = pair.second;
 
-        LoadDialog(dlgId, device, cmdList, chars);
+        LoadDialog(dlgId, device, cmdList, chars, imgBatch);
     }
 }

@@ -15,4 +15,9 @@ public:
     ScreenSpacePoint(ScreenSpacePoint&& other) = default;
     
     ScreenSpacePoint& operator=(const ScreenSpacePoint& other) = default;
+
+    ScreenSpacePoint operator+(const ScreenSpacePoint& other) const
+    {
+        return ScreenSpacePoint {this->x + other.x, this->y + other.y};
+    }
 };

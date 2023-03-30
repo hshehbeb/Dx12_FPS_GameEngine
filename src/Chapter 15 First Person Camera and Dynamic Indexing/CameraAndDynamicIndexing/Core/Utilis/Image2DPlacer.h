@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "../DataStructures/ScreenSpacePoint.h"
-#include "../../Core/UIWidgets/Image2D.h"
+#include "../../DataStructures/TextCN.h"
 
 
 class IBatchable;
@@ -10,15 +10,19 @@ class IBatchable;
 class Image2DPlacer
 {
 private:
-    typedef std::vector<std::shared_ptr<IBatchable>> t_TextImgList;
+    typedef std::vector<std::shared_ptr<ImageBase>> t_TextImgList;
 
 public:
     Image2DPlacer(int maxCharsInOneRow, int spacingBetweenChars, int paddingFromScreenBorder);
 
-    void PlaceDialogAtPos(t_TextImgList& txtImages, ScreenSpacePoint atPos);
+    void PlaceTextAtPos(TextCN* text, ScreenSpacePoint atPos);
+
+    ScreenSpacePoint ScreenTopLeft() const;
+    ScreenSpacePoint ScreenBottomLeft() const;
     
-    void PlaceDialogAtScreenTopLeft(std::vector<std::shared_ptr<IBatchable>>& txtImages);
-    void PlaceDialogAtScreenBottomLeft(std::vector<std::shared_ptr<IBatchable>>& txtImages);
+    void PlaceTextAtScreenTopLeft(TextCN* text);
+    void PlaceTextAtScreenBottomLeft(TextCN* text);
+    // void PlaceTextAtScreenBottomRight(TextCN* text);
 
 private:
     int mMaxCharsInOneRow;

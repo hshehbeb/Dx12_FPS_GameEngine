@@ -296,7 +296,7 @@ void CameraAndDynamicIndexingApp::CreateBatches()
 void CameraAndDynamicIndexingApp::RegisterDialogHandle()
 {
     Resources::gScripter.Parse("Script.json");
-    Resources::gScripter.Initialize(md3dDevice.Get(), mCommandList.Get());
+    Resources::gScripter.Initialize(md3dDevice.Get(), mCommandList.Get(), m2DCharactersBatch.get());
     Resources::gScripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
 }
 
@@ -371,7 +371,7 @@ bool CameraAndDynamicIndexingApp::Initialize()
 
     
     /* ShowDialog() should after Batch.Initialize() */
-    Resources::gScripter.ShowDialog(0, m2DCharactersBatch.get(), {});
+    Resources::gScripter.ShowDialog(0, {});
     
 
     // Execute the initialization commands.

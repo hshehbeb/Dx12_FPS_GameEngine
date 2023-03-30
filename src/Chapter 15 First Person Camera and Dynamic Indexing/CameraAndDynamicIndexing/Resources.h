@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "../../Common/d3dUtil.h"
+#include "Core/Button.h"
 #include "Core/ChineseCharactersLoader.h"
 
 
