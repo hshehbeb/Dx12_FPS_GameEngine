@@ -11,6 +11,8 @@ public:
         , y(y)
     {
     }
-    ScreenSpacePoint(ScreenSpacePoint& other) = default;
+    ScreenSpacePoint(const ScreenSpacePoint& other) = default;
     ScreenSpacePoint(ScreenSpacePoint&& other) = default;
+    
+    ScreenSpacePoint& operator=(const ScreenSpacePoint& other) = default;
 };

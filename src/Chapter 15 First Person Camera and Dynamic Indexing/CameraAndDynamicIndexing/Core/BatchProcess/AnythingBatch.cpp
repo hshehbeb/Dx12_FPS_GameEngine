@@ -13,6 +13,12 @@ void AnythingBatch::Add(std::shared_ptr<IBatchable> uiObj)
     mBatchables.Add(uiObj);
 }
 
+void AnythingBatch::AddRange(const std::vector<std::shared_ptr<IBatchable>>& objs)
+{
+    for (const auto& obj : objs)
+        mBatchables.Add(obj);
+}
+
 void AnythingBatch::InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
     BuildRootSignature(device);

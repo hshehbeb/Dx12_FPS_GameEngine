@@ -7,8 +7,11 @@ class ChineseCharactersLoader
 {
 public:
     void Load(int loadCount, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-    
-    void LoadCharacter(ChineseChar cnChar, ID3D12Device* device,
+
+    /**
+     * returns the idx of this char
+     */
+    int LoadCharacter(ChineseChar cnChar, ID3D12Device* device,
         ID3D12GraphicsCommandList* cmdList);
     
     Texture* GetByIndex(int idx);

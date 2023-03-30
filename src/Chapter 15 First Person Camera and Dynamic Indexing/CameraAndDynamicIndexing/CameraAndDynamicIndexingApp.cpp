@@ -2,13 +2,14 @@
 // CameraAndDynamicIndexingApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
+#include "DialogHandleFuncLibrary.h"
 #include "../../Common/d3dApp.h"
 #include "../../Common/MathHelper.h"
 #include "../../Common/UploadBuffer.h"
 #include "../../Common/GeometryGenerator.h"
 #include "../../Common/Camera.h"
 #include "FrameResource.h"
-#include "ScriptParser.h"
+#include "Scripter.h"
 #include "Core/Button.h"
 #include "Core/Log.h"
 #include "Core/Actors/Actor.h"
@@ -120,6 +121,7 @@ private:
     std::unique_ptr<AnythingBatch> mImageBatch;
     std::unique_ptr<AnythingBatch> mAxisIndicatorBatch;
     std::unique_ptr<AnythingBatch> mCharBatch;
+    std::unique_ptr<AnythingBatch> m2DCharactersBatch;
     
     EfficientLookup<std::shared_ptr<Button>> mButtonsRegistry;
     EfficientLookup<std::shared_ptr<IBatchable>>  mImagesRegistry;
@@ -211,11 +213,20 @@ void CameraAndDynamicIndexingApp::PrintFirstNCharacters(const int printCount)
 
 void CameraAndDynamicIndexingApp::InitImages()
 {
-    ScriptParser parser {};
-    parser.Parse("Script.json");
-    parser.LoadTextureOfAllCharacters(md3dDevice.Get(), mCommandList.Get());
+    m2DCharactersBatch =
+        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
+            L"Shaders\\vet_renderer2d.hlsl",
+            L"Shaders\\pxl_renderer2d.hlsl"
+        });
+
+    Scripter scripter {};
+    scripter.Parse("Script.json");
+    scripter.Initialize(md3dDevice.Get(), mCommandList.Get());
+    scripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
+
+    scripter.ShowDialog(0, m2DCharactersBatch.get(), {});
     
-    PrintFirstNCharacters(3);
+    // PrintFirstNCharacters(3);
 
     // const int printCount = 30;
     // Resources::CnCharLoader.Load(printCount, md3dDevice.Get(), mCommandList.Get());
@@ -264,6 +275,11 @@ bool CameraAndDynamicIndexingApp::Initialize()
     
 	LoadTextures();
     
+    mImageBatch =
+        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
+            L"Shaders\\vet_renderer2d.hlsl",
+            L"Shaders\\pxl_renderer2d.hlsl"
+        }, mImagesRegistry);
     InitImages();
     InitButtons();
     
@@ -277,11 +293,6 @@ bool CameraAndDynamicIndexingApp::Initialize()
         );
     mAxisIndicatorBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
-    mImageBatch =
-        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
-            L"Shaders\\vet_renderer2d.hlsl",
-            L"Shaders\\pxl_renderer2d.hlsl"
-        }, mImagesRegistry);
     mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
 
     mCharBatch =
@@ -289,6 +300,8 @@ bool CameraAndDynamicIndexingApp::Initialize()
             L"Shaders\\vet_stdUnlit.hlsl",
             L"Shaders\\pxl_stdUnlit.hlsl"
         });
+
+    m2DCharactersBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
     BuildRootSignature();
 	BuildDescriptorHeaps();
@@ -334,6 +347,7 @@ void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
     
     mAxisIndicatorBatch->UpdateAll();
     mImageBatch->UpdateAll();
+    m2DCharactersBatch->UpdateAll();
     mCharBatch->UpdateAll();
 
     // Cycle through the circular frame resource array.
@@ -410,6 +424,7 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
     
     mAxisIndicatorBatch->DrawAll(mCommandList.Get());
     mImageBatch->DrawAll(mCommandList.Get());
+    m2DCharactersBatch->DrawAll(mCommandList.Get());
     mCharBatch->DrawAll(mCommandList.Get());
     
     // Indicate a state transition on the resource usage.

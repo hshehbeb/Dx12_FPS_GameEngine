@@ -19,7 +19,7 @@ void ChineseCharactersLoader::Load(int loadCount, ID3D12Device* device, ID3D12Gr
     }
 }
 
-void ChineseCharactersLoader::LoadCharacter(ChineseChar cnChar, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
+int ChineseCharactersLoader::LoadCharacter(ChineseChar cnChar, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList)
 {
     auto charTex = std::make_unique<Texture>();
     charTex->Name = std::string("charTex") + std::to_string( rand() );
@@ -28,8 +28,10 @@ void ChineseCharactersLoader::LoadCharacter(ChineseChar cnChar, ID3D12Device* de
         cnChar, device, cmdList, charTex->Filename.c_str(),
         charTex->Resource, charTex->UploadHeap)
     );
-        
+
+    int idx = mCharTexList_Opaque.size();
     mCharTexList_Opaque.push_back(std::move(charTex));
+    return idx;
 }
 
 Texture* ChineseCharactersLoader::GetByIndex(int idx)

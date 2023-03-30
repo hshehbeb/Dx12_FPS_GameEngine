@@ -25,7 +25,8 @@ public:
         EfficientLookup<std::shared_ptr<IBatchable>> batchables = {});
 
     void Add(std::shared_ptr<IBatchable> uiObj);
-    
+    void AddRange(const std::vector<std::shared_ptr<IBatchable>>& objs);
+
     void InitAll(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
     void UpdateAll();
     void DrawAll(ID3D12GraphicsCommandList* cmdList);
