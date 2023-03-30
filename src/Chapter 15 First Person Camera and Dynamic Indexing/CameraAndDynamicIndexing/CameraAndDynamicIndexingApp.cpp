@@ -67,7 +67,7 @@ private:
 	void UpdateMainPassCB(const GameTimer& gt);
 
     void InitButtons();
-    void PrintFirstNCharacters(int printCount);
+    // void PrintFirstNCharacters(int printCount);
     void InitImages();
     void LoadTextures();
     void BuildRootSignature();
@@ -194,37 +194,26 @@ void CameraAndDynamicIndexingApp::InitButtons()
     }
 }
 
-void CameraAndDynamicIndexingApp::PrintFirstNCharacters(const int printCount)
-{
-    const int TOTAL_COLS = 10, GRID_SIZE = 50;
-    const int TOTAL_ROWS = std::ceil((float)printCount / TOTAL_COLS);
-    
-    for (int row = 0; row < TOTAL_ROWS; row++)
-        for (int col = 0; col < std::fmin(printCount, TOTAL_COLS); col++)
-            mImagesRegistry.Add(std::make_shared<Image2D>(
-                ScreenSpacePoint {
-                    static_cast<int>(GRID_SIZE * 0.5 + col * GRID_SIZE),
-                    static_cast<int>(GRID_SIZE * 0.5 + row * GRID_SIZE)
-                    },
-                GRID_SIZE, GRID_SIZE,
-                Resources::CnCharLoader.GetByIndex(row * TOTAL_COLS + col))
-            );
-}
+// void CameraAndDynamicIndexingApp::PrintFirstNCharacters(const int printCount)
+// {
+//     const int TOTAL_COLS = 10, GRID_SIZE = 50;
+//     const int TOTAL_ROWS = std::ceil((float)printCount / TOTAL_COLS);
+//     
+//     for (int row = 0; row < TOTAL_ROWS; row++)
+//         for (int col = 0; col < std::fmin(printCount, TOTAL_COLS); col++)
+//             mImagesRegistry.Add(std::make_shared<Image2D>(
+//                 ScreenSpacePoint {
+//                     static_cast<int>(GRID_SIZE * 0.5 + col * GRID_SIZE),
+//                     static_cast<int>(GRID_SIZE * 0.5 + row * GRID_SIZE)
+//                     },
+//                 GRID_SIZE, GRID_SIZE,
+//                 Resources::CnCharLoader.GetByIndex(row * TOTAL_COLS + col))
+//             );
+// }
 
 void CameraAndDynamicIndexingApp::InitImages()
 {
-    m2DCharactersBatch =
-        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
-            L"Shaders\\vet_renderer2d.hlsl",
-            L"Shaders\\pxl_renderer2d.hlsl"
-        });
-
-    Scripter scripter {};
-    scripter.Parse("Script.json");
-    scripter.Initialize(md3dDevice.Get(), mCommandList.Get());
-    scripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
-
-    scripter.ShowDialog(0, m2DCharactersBatch.get(), {});
+    // scripter.ShowDialog(0, m2DCharactersBatch.get(), {});
     
     // PrintFirstNCharacters(3);
 
@@ -275,13 +264,27 @@ bool CameraAndDynamicIndexingApp::Initialize()
     
 	LoadTextures();
     
+
+    m2DCharactersBatch =
+        std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
+            L"Shaders\\vet_renderer2d.hlsl",
+            L"Shaders\\pxl_renderer2d.hlsl"
+        });
+
+    Scripter scripter {};
+    scripter.Parse("Script.json");
+    scripter.Initialize(md3dDevice.Get(), mCommandList.Get());
+    scripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
+    
+    InitImages();
+    InitButtons();
+    
     mImageBatch =
         std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
             L"Shaders\\vet_renderer2d.hlsl",
             L"Shaders\\pxl_renderer2d.hlsl"
         }, mImagesRegistry);
-    InitImages();
-    InitButtons();
+    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
     mAxisIndicatorBatch =
         std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
@@ -293,7 +296,6 @@ bool CameraAndDynamicIndexingApp::Initialize()
         );
     mAxisIndicatorBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     
-    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
 
     mCharBatch =
         std::make_unique<AnythingBatch>(AnythingBatch::BatchArgs {
