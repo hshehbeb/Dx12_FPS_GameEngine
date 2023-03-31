@@ -9,13 +9,14 @@
 // }
 
 Button::Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture,
-    std::function<void(ScreenSpacePoint)>&& onClickHandle)
+    std::function<void(ScreenSpacePoint)>&& onClickHandle, bool isVisible)
     : mPos(atPos)
     , mWidth(width)
     , mHeight(height)
     , mOnClickHandle(onClickHandle)
 {
     image = std::make_shared<Image2D>(mPos, width, height, pTexture);
+    SetShouldDraw(isVisible);
 }
 
 bool Button::CheckIfClicked(const ScreenSpacePoint& clickPos)
@@ -53,5 +54,15 @@ ScreenSpacePoint Button::GetMaxCorner()
 void Button::SetShouldDraw(bool newValue)
 {
     image->Visible = newValue;
+}
+
+void Button::SetPosition(const ScreenSpacePoint& newPos)
+{
+    image->SetPosition(newPos);
+}
+
+const ScreenSpacePoint& Button::GetPosition() const
+{
+    return image->GetPosition();
 }
 

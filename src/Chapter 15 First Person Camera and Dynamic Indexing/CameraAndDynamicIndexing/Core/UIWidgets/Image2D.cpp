@@ -14,6 +14,11 @@ void Image2D::SetPosition(const ScreenSpacePoint& newPos)
     mScreenPos = newPos;
 }
 
+const ScreenSpacePoint& Image2D::GetPosition()
+{
+    return mScreenPos;
+}
+
 DirectX::XMFLOAT4X4 Image2D::CalculateMVPMatrix() const
 {
     float W = D3DApp::GetApp()->mClientWidth;

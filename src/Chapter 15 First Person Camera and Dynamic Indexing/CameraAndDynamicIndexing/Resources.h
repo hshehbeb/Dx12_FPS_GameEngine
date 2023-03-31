@@ -13,6 +13,7 @@ namespace Resources
     extern t_TextureLookup RegularTextures;
     extern ChineseCharactersLoader CnCharLoader;
     extern Scripter gScripter;
+    extern std::vector<std::shared_ptr<Button>> gChoiceButtons;
     
 /**
  * to use a handy LoadTexture macro to eliminate writing boilerplate,

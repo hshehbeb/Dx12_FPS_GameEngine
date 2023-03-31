@@ -8,6 +8,7 @@ public:
     Image2D(ScreenSpacePoint screenPos, int width, int height, Texture* tex);
 
     void SetPosition(const ScreenSpacePoint& newPos);
+    const ScreenSpacePoint& GetPosition();
 
 protected:
     DirectX::XMFLOAT4X4 CalculateMVPMatrix() const override;

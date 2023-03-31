@@ -319,8 +319,23 @@ void CameraAndDynamicIndexingApp::LoadMenuButtons()
                              })
     );
     mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
+
     for (auto& btn : mButtonsRegistry.GetValues())
     {
+        mImageBatch->Add(btn->image);
+    }
+    
+    /* prepare reusable option buttons for dialog */
+    static const int MAX_BUTTONS = 3;
+    for (int i = 0; i < MAX_BUTTONS; i++)
+    {
+        auto btn = std::make_shared<Button>(
+            ScreenSpacePoint {0, 0}, 50, 50,
+            Resources::RegularTextures["ContinueGame"].get(),
+            [](ScreenSpacePoint){}, false
+        );
+
+        Resources::gChoiceButtons.push_back(btn);
         mImageBatch->Add(btn->image);
     }
 }

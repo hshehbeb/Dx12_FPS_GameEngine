@@ -3,18 +3,18 @@
 #include <memory>
 
 #include "../DataStructures/ScreenSpacePoint.h"
-#include "UIWidgets/ImageBase.h"
+#include "UIWidgets/Image2D.h"
 
 struct Texture;
 
 class Button
 {
 public:
-    std::shared_ptr<ImageBase> image;
+    std::shared_ptr<Image2D> image;
     
 public:
     Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture,
-           std::function<void(ScreenSpacePoint)>&& onClickHandle);
+           std::function<void(ScreenSpacePoint)>&& onClickHandle, bool isVisible = true);
     
     // void Initialize(UIObjectsCollection* uiObjsCollection);
     bool CheckIfClicked(const ScreenSpacePoint& clickPos);
@@ -24,6 +24,8 @@ public:
     ScreenSpacePoint GetMinCorner();
     ScreenSpacePoint GetMaxCorner();
     void SetShouldDraw(bool newValue);
+    void SetPosition(const ScreenSpacePoint& newPos);
+    const ScreenSpacePoint& GetPosition() const;
 
 private:
     ScreenSpacePoint mPos;

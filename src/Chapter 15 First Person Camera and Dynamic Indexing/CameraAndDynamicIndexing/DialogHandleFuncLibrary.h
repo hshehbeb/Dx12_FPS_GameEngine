@@ -12,14 +12,21 @@ namespace DialogHandleFuncLibrary
         auto text = Resources::gScripter.GetTextOfDialog(dlgId);
         for (const auto & img : text->Images)
             img->Visible = true;
-
         
         auto& replies = Resources::gScripter.GetReplyIndices(0);
-        for (auto replyIdx : replies)
+        for (int i = 0; i < replies.size(); i++)
         {
+            auto replyIdx = replies[i];
             auto theText = Resources::gScripter.GetTextOfDialog(replyIdx);
             for (const auto & img : theText->Images)
                 img->Visible = true;
+            
+            auto& btn = Resources::gChoiceButtons[i];
+            auto pos =
+                dynamic_cast<Image2D*>(theText->Images.back().get())->GetPosition()
+                + ScreenSpacePoint {80, 0};
+            btn->SetPosition(pos);
+            btn->SetShouldDraw(true);
         }
         
         // gPlacer.PlaceTextAtPos(text, ScreenSpacePoint {200, 200});
