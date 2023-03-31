@@ -84,6 +84,7 @@ void Scripter::LoadDialog(int dlgIdx, ID3D12Device* device, ID3D12GraphicsComman
             ScreenSpacePoint {x.asInt() + i * size.asInt(), y.asInt()},
             size.asInt(), size.asInt(), tex
             );
+        img->Visible = false;
         
         text->Images.push_back(img);
         imgBatch->Add(img);

@@ -7,13 +7,43 @@ namespace DialogHandleFuncLibrary
 {
     Image2DPlacer gPlacer {10, 50, 5};
 
+    inline void HideText(TextCN& text)
+    {
+        for (const auto& img : text.Images)
+            img->Visible = false;
+
+        for (const auto& btn : Resources::gChoiceButtons)
+        {
+            btn->SetShouldDraw(false);
+        } 
+    }
+
+    inline void HideDialog(int dlgId)
+    {
+        auto text = Resources::gScripter.GetTextOfDialog(dlgId);
+        for (const auto & img : text->Images)
+            img->Visible = false;
+
+        auto& replies = Resources::gScripter.GetReplyIndices(0);
+        for (int i = 0; i < replies.size(); i++)
+        {
+            auto replyIdx = replies[i];
+            auto theText = Resources::gScripter.GetTextOfDialog(replyIdx);
+            for (const auto & img : theText->Images)
+                img->Visible = false;
+            
+            auto& btn = Resources::gChoiceButtons[i];
+            btn->SetShouldDraw(false);
+        }
+    }
+
     inline void ShowAsClassicDialog2D(int dlgId)
     {
         auto text = Resources::gScripter.GetTextOfDialog(dlgId);
         for (const auto & img : text->Images)
             img->Visible = true;
         
-        auto& replies = Resources::gScripter.GetReplyIndices(0);
+        auto& replies = Resources::gScripter.GetReplyIndices(dlgId);
         for (int i = 0; i < replies.size(); i++)
         {
             auto replyIdx = replies[i];
@@ -24,26 +54,23 @@ namespace DialogHandleFuncLibrary
             auto& btn = Resources::gChoiceButtons[i];
             auto pos =
                 dynamic_cast<Image2D*>(theText->Images.back().get())->GetPosition()
-                + ScreenSpacePoint {80, 0};
+                + ScreenSpacePoint {55, 0};
             btn->SetPosition(pos);
             btn->SetShouldDraw(true);
+            btn->SetOnClickHandle([dlgId](ScreenSpacePoint) {
+                HideDialog(dlgId);
+                Resources::gScripter.ShowDialog(3, {});
+            });
         }
-        
-        // gPlacer.PlaceTextAtPos(text, ScreenSpacePoint {200, 200});
-
-        // for (int i = 0; i < replies.size(); i++)
-        // {
-            // auto aReply = replies[i];
-            // auto itsText = Resources::gScripter.GetTextOfDialog(aReply);
-            // auto itsPos = ScreenSpacePoint {100, 300}
-            //     + ScreenSpacePoint {spacingBetweenTexts * i, 0};
-            //
-            // gPlacer.PlaceTextAtPos( itsText, itsPos );
-        // }
     }
 
     inline void HandleDialog1(Scripter::t_DialogHandleFuncParams)
     {
         ShowAsClassicDialog2D(0);
+    }
+
+    inline void HandleDialog3(Scripter::t_DialogHandleFuncParams)
+    {
+        ShowAsClassicDialog2D(3);
     }
 };

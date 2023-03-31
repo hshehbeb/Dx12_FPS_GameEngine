@@ -297,33 +297,34 @@ void CameraAndDynamicIndexingApp::RegisterDialogHandle()
 {
     Resources::gScripter.Parse("Script.json");
     Resources::gScripter.Initialize(md3dDevice.Get(), mCommandList.Get(), m2DCharactersBatch.get());
+    
     Resources::gScripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
+    Resources::gScripter.RegisterDialogHandle(3, &DialogHandleFuncLibrary::HandleDialog3);
 }
 
 void CameraAndDynamicIndexingApp::LoadMenuButtons()
 {
-    mButtonsRegistry.Add("btn_PauseGame", std::make_shared<Button>(
-                             ScreenSpacePoint {100, 500}, 100, 50,
-                             Resources::RegularTextures["PauseGame"].get(),
-                             [&](ScreenSpacePoint p){
-                                 mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(true);
-                                 mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(false);
-                             })
-    );
-    mButtonsRegistry.Add("btn_ContinueGame", std::make_shared<Button>(
-                             ScreenSpacePoint {400, 300}, 100, 50,
-                             Resources::RegularTextures["ContinueGame"].get(),
-                             [&](ScreenSpacePoint p){
-                                 mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
-                                 mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(true);
-                             })
-    );
-    mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
+    // mButtonsRegistry.Add("btn_PauseGame", std::make_shared<Button>(
+    //                          ScreenSpacePoint {100, 500}, 100, 50,
+    //                          Resources::RegularTextures["PauseGame"].get(),
+    //                          [&](ScreenSpacePoint p){
+    //                              mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(true);
+    //                              mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(false);
+    //                          })
+    // );
+    // mButtonsRegistry.Add("btn_ContinueGame", std::make_shared<Button>(
+    //                          ScreenSpacePoint {400, 300}, 100, 50,
+    //                          Resources::RegularTextures["ContinueGame"].get(),
+    //                          [&](ScreenSpacePoint p){
+    //                              mButtonsRegistry.Get("btn_ContinueGame")->SetShouldDraw(false);
+    //                              mButtonsRegistry.Get("btn_PauseGame")->SetShouldDraw(true);
+    //                          }, false)
+    // );
 
-    for (auto& btn : mButtonsRegistry.GetValues())
-    {
-        mImageBatch->Add(btn->image);
-    }
+    // for (auto& btn : mButtonsRegistry.GetValues())
+    // {
+    //     mImageBatch->Add(btn->image);
+    // }
     
     /* prepare reusable option buttons for dialog */
     static const int MAX_BUTTONS = 3;
@@ -331,12 +332,15 @@ void CameraAndDynamicIndexingApp::LoadMenuButtons()
     {
         auto btn = std::make_shared<Button>(
             ScreenSpacePoint {0, 0}, 50, 50,
-            Resources::RegularTextures["ContinueGame"].get(),
+            Resources::RegularTextures["Arrow"].get(),
             [](ScreenSpacePoint){}, false
         );
 
         Resources::gChoiceButtons.push_back(btn);
         mImageBatch->Add(btn->image);
+
+        std::string name = "btn_Option_" + std::to_string(i);
+        mButtonsRegistry.Add(name.data(), btn);
     }
 }
 
@@ -740,6 +744,7 @@ void CameraAndDynamicIndexingApp::LoadTextures()
 
     LoadTexture(PauseGame);
     LoadTexture(ContinueGame);
+    LoadTexture(Arrow);
 
 	Resources::RegularTextures[bricksTex->Name] = std::move(bricksTex);
 	Resources::RegularTextures[stoneTex->Name] = std::move(stoneTex);

@@ -24,6 +24,7 @@ public:
     ScreenSpacePoint GetMinCorner();
     ScreenSpacePoint GetMaxCorner();
     void SetShouldDraw(bool newValue);
+    void SetOnClickHandle(std::function<void(ScreenSpacePoint)> newHandle);
     void SetPosition(const ScreenSpacePoint& newPos);
     const ScreenSpacePoint& GetPosition() const;
 

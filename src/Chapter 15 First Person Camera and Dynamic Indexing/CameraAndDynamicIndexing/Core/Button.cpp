@@ -21,6 +21,9 @@ Button::Button(ScreenSpacePoint& atPos, int width, int height, Texture* pTexture
 
 bool Button::CheckIfClicked(const ScreenSpacePoint& clickPos)
 {
+    if (!image->Visible)
+        return false;
+    
     auto maxCorner = GetMaxCorner();
     auto minCorner = GetMinCorner();
     
@@ -56,8 +59,14 @@ void Button::SetShouldDraw(bool newValue)
     image->Visible = newValue;
 }
 
+void Button::SetOnClickHandle(std::function<void(ScreenSpacePoint)> newHandle)
+{
+    mOnClickHandle = newHandle;
+}
+
 void Button::SetPosition(const ScreenSpacePoint& newPos)
 {
+    mPos = newPos;
     image->SetPosition(newPos);
 }
 
