@@ -20,6 +20,8 @@ private:
     {
         std::unique_ptr<TextCN> Text;
         int JumpToDialog;
+
+        bool ShouldJump() const;
     };
     
     struct DialogInfo
@@ -28,7 +30,8 @@ private:
         std::unique_ptr<TextCN> Text;
         std::vector<std::unique_ptr<ReplyInfo>> Replies;
 
-        void SetVisibility(bool flag);
+        void ShowDialog();
+        void HideDialog();
     };    
 
 public:

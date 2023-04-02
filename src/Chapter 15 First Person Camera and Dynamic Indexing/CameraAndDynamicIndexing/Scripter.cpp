@@ -1,25 +1,30 @@
 ﻿#include <fstream>
 #include <functional>
-#include <unordered_set>
 #include <memory>
 #include "Scripter.h"
 
+#include "DialogHandleFuncLibrary.h"
 #include "Resources.h"
 #include "Core/UIWidgets/Image2D.h"
 #include "DataStructures/ChineseChar.h"
 
 
-void Scripter::DialogInfo::SetVisibility(bool flag)
+bool Scripter::ReplyInfo::ShouldJump() const
+{
+    return JumpToDialog >= 0;
+}
+
+void Scripter::DialogInfo::ShowDialog()
 {
     for (const auto & img : Text->Images)
-        img->Visible = flag;
+        img->Visible = true;
 
     for (int i = 0; i < Replies.size(); i++)
     {
         const auto& aReply = Replies[i];
         for (const auto & img : aReply ->Text->Images)
         {
-            img->Visible = flag;
+            img->Visible = true;
         }
 
         auto& btn = Resources::gChoiceButtons[i];
@@ -27,6 +32,26 @@ void Scripter::DialogInfo::SetVisibility(bool flag)
             aReply->Text->Images.back().get())->GetPosition() + ScreenSpacePoint {50, 0}
             );
         btn->SetShouldDraw(true);
+        if ( aReply->ShouldJump() )
+            btn->SetOnClickHandle([&aReply, this](ScreenSpacePoint){
+                this->HideDialog();
+                Resources::gScripter->ShowDialog(aReply->JumpToDialog, {});
+            });
+    }
+}
+
+void Scripter::DialogInfo::HideDialog()
+{
+    for (const auto& img : Text->Images)
+        img->Visible = false;
+
+    for (int i = 0; i < Replies.size(); i++)
+    {
+        const auto& aReply = Replies[i];
+        for (const auto & img : aReply ->Text->Images)
+            img->Visible = false;
+
+        Resources::gChoiceButtons[i]->SetShouldDraw(false);
     }
 }
 
@@ -115,12 +140,11 @@ void Scripter::RegisterDialogHandle(int dlgIdx, t_DialogHandleFunc handleFunc)
 
 void Scripter::ShowDialog(int dlgIdx, const t_DialogHandleFuncParams& params)
 {
-    bool anyHandleFound =
-        HandleLookup.find(dlgIdx) != HandleLookup.end();
-    if (!anyHandleFound) return;
+    bool anyHandleFound = (HandleLookup.find(dlgIdx) != HandleLookup.end());
 
-    auto& handleFunc = HandleLookup[dlgIdx];
-    handleFunc(params);
+    anyHandleFound
+        ? HandleLookup[dlgIdx](params)
+        : DialogHandleFuncLibrary::ShowAsClassicDialog2D(dlgIdx); 
 }
 
 // TextCN* Scripter::GetTextOfDialog(int dlgIdx)
