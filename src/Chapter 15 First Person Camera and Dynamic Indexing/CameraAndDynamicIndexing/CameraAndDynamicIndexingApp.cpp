@@ -327,6 +327,11 @@ void CameraAndDynamicIndexingApp::LoadMenuUiElements()
     // {
     //     mImageBatch->Add(btn->image);
     // }
+
+    mImageBatch->Add(std::make_shared<Image2D>(
+        ScreenSpacePoint {400, 280}, 600, 360,
+        Resources::RegularTextures["DialogBG"].get()
+        ));
     
     /* prepare reusable option buttons for dialog */
     static const int MAX_BUTTONS = 3;
@@ -748,6 +753,7 @@ void CameraAndDynamicIndexingApp::LoadTextures()
     LoadTexture(PauseGame);
     LoadTexture(ContinueGame);
     LoadTexture(Arrow);
+    LoadTexture(DialogBG);
 
 	Resources::RegularTextures[bricksTex->Name] = std::move(bricksTex);
 	Resources::RegularTextures[stoneTex->Name] = std::move(stoneTex);
