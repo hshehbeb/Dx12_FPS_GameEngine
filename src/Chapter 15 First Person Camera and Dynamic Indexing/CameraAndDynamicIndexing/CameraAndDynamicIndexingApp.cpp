@@ -74,7 +74,7 @@ private:
     void LoadActors();
     void CreateBatches();
     void RegisterDialogHandle();
-    void LoadMenuButtons();
+    void LoadMenuUiElements();
     void InitBatches();
     void LoadTextures();
     void BuildRootSignature();
@@ -246,24 +246,24 @@ void CameraAndDynamicIndexingApp::LoadPlayerAndCamera()
                          mAllRenderItems);
 
     /* player body */
-    mImageBatch->Add(std::make_shared<Image2D>(
-        ScreenSpacePoint {630, 520},
-        300, 300,
-        Resources::RegularTextures["playerTex"].get())
-        );
+    // mImageBatch->Add(std::make_shared<Image2D>(
+    //     ScreenSpacePoint {630, 520},
+    //     300, 300,
+    //     Resources::RegularTextures["playerTex"].get())
+    //     );
 
     /* crosshairs */
-    mImageBatch->Add(std::make_shared<Image2D>(
-        ScreenSpacePoint {400, 300},
-        30, 30,
-        Resources::RegularTextures["crosshairsTex"].get())
-        );
+    // mImageBatch->Add(std::make_shared<Image2D>(
+    //     ScreenSpacePoint {400, 300},
+    //     30, 30,
+    //     Resources::RegularTextures["crosshairsTex"].get())
+    //     );
 }
 
 void CameraAndDynamicIndexingApp::LoadActors()
 {
     LoadPlayerAndCamera();
-    LoadMenuButtons();
+    LoadMenuUiElements();
 }
 
 void CameraAndDynamicIndexingApp::CreateBatches()
@@ -295,14 +295,16 @@ void CameraAndDynamicIndexingApp::CreateBatches()
 
 void CameraAndDynamicIndexingApp::RegisterDialogHandle()
 {
-    Resources::gScripter.Parse("Script.json");
-    Resources::gScripter.Initialize(md3dDevice.Get(), mCommandList.Get(), m2DCharactersBatch.get());
+    Resources::gScripter = std::make_shared<Scripter>("Script.json");
+    Resources::gScripter->Initialize(
+        md3dDevice.Get(), mCommandList.Get(), m2DCharactersBatch.get()
+        );
     
-    Resources::gScripter.RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
-    Resources::gScripter.RegisterDialogHandle(3, &DialogHandleFuncLibrary::HandleDialog3);
+    Resources::gScripter->RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
+    Resources::gScripter->RegisterDialogHandle(3, &DialogHandleFuncLibrary::HandleDialog3);
 }
 
-void CameraAndDynamicIndexingApp::LoadMenuButtons()
+void CameraAndDynamicIndexingApp::LoadMenuUiElements()
 {
     // mButtonsRegistry.Add("btn_PauseGame", std::make_shared<Button>(
     //                          ScreenSpacePoint {100, 500}, 100, 50,
@@ -337,7 +339,7 @@ void CameraAndDynamicIndexingApp::LoadMenuButtons()
         );
 
         Resources::gChoiceButtons.push_back(btn);
-        mImageBatch->Add(btn->image);
+        m2DCharactersBatch->Add(btn->image);
 
         std::string name = "btn_Option_" + std::to_string(i);
         mButtonsRegistry.Add(name.data(), btn);
@@ -347,9 +349,9 @@ void CameraAndDynamicIndexingApp::LoadMenuButtons()
 void CameraAndDynamicIndexingApp::InitBatches()
 {
     /* Actor Initialize() should before Batch Initialize() */
-    m2DCharactersBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
-    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     mAxisIndicatorBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+    mImageBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
+    m2DCharactersBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
     m3DCharactersBatch->InitAll(md3dDevice.Get(), mCommandList.Get());
 }
 
@@ -390,7 +392,7 @@ bool CameraAndDynamicIndexingApp::Initialize()
 
     
     /* ShowDialog() should after Batch.Initialize() */
-    Resources::gScripter.ShowDialog(0, {});
+    Resources::gScripter->ShowDialog(0, {});
     
 
     // Execute the initialization commands.
@@ -498,11 +500,12 @@ void CameraAndDynamicIndexingApp::Draw(const GameTimer& gt)
     mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
     
 	Draw3dObjects();
-    
+
+    /* first batch that calls DrawAll is the topmost */
     mAxisIndicatorBatch->DrawAll(mCommandList.Get());
-    mImageBatch->DrawAll(mCommandList.Get());
-    m2DCharactersBatch->DrawAll(mCommandList.Get());
     m3DCharactersBatch->DrawAll(mCommandList.Get());
+    m2DCharactersBatch->DrawAll(mCommandList.Get());
+    mImageBatch->DrawAll(mCommandList.Get());
     
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),

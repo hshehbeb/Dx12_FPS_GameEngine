@@ -3,7 +3,7 @@
 
 Resources::t_TextureLookup Resources::RegularTextures {};
 ChineseCharactersLoader Resources::CnCharLoader {};
-Scripter Resources::gScripter {};
+std::shared_ptr<Scripter> Resources::gScripter {};
 std::vector<std::shared_ptr<Button>> Resources::gChoiceButtons {};
 
 

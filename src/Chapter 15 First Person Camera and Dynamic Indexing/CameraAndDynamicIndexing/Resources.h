@@ -12,7 +12,7 @@ namespace Resources
     
     extern t_TextureLookup RegularTextures;
     extern ChineseCharactersLoader CnCharLoader;
-    extern Scripter gScripter;
+    extern std::shared_ptr<Scripter> gScripter;
     extern std::vector<std::shared_ptr<Button>> gChoiceButtons;
     
 /**

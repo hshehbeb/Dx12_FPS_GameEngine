@@ -16,14 +16,31 @@
 class Scripter
 {
 private:
-    struct ParseResult;
+    struct ReplyInfo
+    {
+        std::unique_ptr<TextCN> Text;
+        int JumpToDialog;
+    };
+    
+    struct DialogInfo
+    {
+        int Id;
+        std::unique_ptr<TextCN> Text;
+        std::vector<std::unique_ptr<ReplyInfo>> Replies;
+
+        void SetVisibility(bool flag);
+    };    
 
 public:
     typedef std::unordered_map<std::string, IDialogHandleFuncParam> t_DialogHandleFuncParams;
     typedef std::function<void (const t_DialogHandleFuncParams&)> t_DialogHandleFunc;
+
+public:
+    std::unordered_map<int, std::unique_ptr<DialogInfo>> DialogLookup;
+    std::unordered_map<int, t_DialogHandleFunc> HandleLookup;
     
 public:
-    void Parse(const char* filePath);
+    explicit Scripter(const char* filePath);
     void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch);
 
     void RegisterDialogHandle(int dlgIdx, t_DialogHandleFunc handleFunc);
@@ -34,20 +51,24 @@ public:
      */
     void ShowDialog(int dlgIdx, const t_DialogHandleFuncParams& params);
 
-    TextCN* GetTextOfDialog(int dlgIdx);
-    std::vector<int>& GetReplyIndices(int dlgIdx) const;
+    // TextCN* GetTextOfDialog(int dlgIdx);
+    // std::vector<int>& GetReplyIndices(int dlgIdx) const;
     
 private:
-    std::shared_ptr<ParseResult> mParseResult;
-    std::unordered_map<int, std::unique_ptr<TextCN>> mDlgIdToText;
-    std::unordered_map<int, t_DialogHandleFunc> mDlgIdToHandleFunc;
+    // std::shared_ptr<ParseResult> mParseResult;
+    // std::unordered_map<int, std::unique_ptr<TextCN>> mDlgIdToText;
+
+    const char* mJsonPath;
 
 private:
-    void ParseJsonObject(const Json::Value& jsonObj);
-    void ParseDialog(const Json::Value& dlgJson);
+    void ParseFromJson(const char* filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch);
+    void ParseJsonObject(const Json::Value& jsonObj, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* batch);
+    void ParseDialog(const Json::Value& dlgJson, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* batch);
+    std::unique_ptr<TextCN> CreateTextObject(const Json::Value& dlgJson, ID3D12Device* device,
+                                             ID3D12GraphicsCommandList* cmdList, AnythingBatch* batch);
 
-    void LoadAllDialogs(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch);
-    void LoadDialog(int dlgIdx,
-                    ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
-                    const std::vector<ChineseChar>& characters, AnythingBatch* imgBatch);
+    // void LoadAllDialogs(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch);
+    // void LoadDialog(int dlgIdx,
+    //                 ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
+    //                 const std::vector<ChineseChar>& characters, AnythingBatch* imgBatch);
 };

@@ -3,15 +3,15 @@
     {
       "id": 0, "say": "是不是", "format": {"x": 340, "y": 200, "size": 50},
       "replies": [
-        {"id": 1, "say": "是的", "format": {"x": 200, "y": 300, "size": 30}},
-        {"id": 2, "say": "不是", "format": {"x": 500, "y": 300, "size": 30}}
+        {"say": "是的", "format": {"x": 200, "y": 300, "size": 30}, "jump_to": 1},
+        {"say": "不是", "format": {"x": 500, "y": 300, "size": 30}}
       ]
     },
     {
-      "id": 3, "say": "好不好", "format": {"x":  340, "y":  200, "size":  50},
+      "id": 1, "say": "好不好", "format": {"x":  340, "y":  200, "size":  50},
       "replies": [
-        {"id": 4, "say": "好", "format": {"x": 200, "y": 300, "size": 30}},
-        {"id": 5, "say": "还行吧", "format": {"x": 500, "y": 300, "size": 30}}
+        {"say": "好", "format": {"x": 200, "y": 300, "size": 30}},
+        {"say": "还行吧", "format": {"x": 500, "y": 300, "size": 30}}
       ]
     }
   ]
