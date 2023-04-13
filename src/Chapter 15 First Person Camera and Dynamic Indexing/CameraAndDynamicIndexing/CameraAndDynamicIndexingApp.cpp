@@ -328,10 +328,10 @@ void CameraAndDynamicIndexingApp::LoadMenuUiElements()
     //     mImageBatch->Add(btn->image);
     // }
 
-    mImageBatch->Add(std::make_shared<Image2D>(
-        ScreenSpacePoint {400, 280}, 600, 360,
-        Resources::RegularTextures["DialogBG"].get()
-        ));
+    // mImageBatch->Add(std::make_shared<Image2D>(
+    //     ScreenSpacePoint {400, 280}, 600, 360,
+    //     Resources::RegularTextures["DialogBG"].get()
+    //     ));
     
     /* prepare reusable option buttons for dialog */
     static const int MAX_BUTTONS = 3;
@@ -397,7 +397,7 @@ bool CameraAndDynamicIndexingApp::Initialize()
 
     
     /* ShowDialog() should after Batch.Initialize() */
-    Resources::gScripter->ShowDialog(0, {});
+    // Resources::gScripter->ShowDialog(0, {});
     
 
     // Execute the initialization commands.
@@ -750,10 +750,19 @@ void CameraAndDynamicIndexingApp::LoadTextures()
         mCommandList.Get(), crosshairsTex->Filename.c_str(),
         crosshairsTex->Resource, crosshairsTex->UploadHeap));
 
+    // auto npcTex = std::make_unique<Texture>();
+    // npcTex->Name = "crosshairsTex";
+    // npcTex->Filename = TEXT("../../Textures/T_NpcTex.png");
+    // ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
+    //     mCommandList.Get(), npcTex->Filename.c_str(),
+    //     npcTex->Resource, npcTex->UploadHeap)
+    //     );
+
     LoadTexture(PauseGame);
     LoadTexture(ContinueGame);
     LoadTexture(Arrow);
     LoadTexture(DialogBG);
+    LoadTexture(NpcTex);
 
 	Resources::RegularTextures[bricksTex->Name] = std::move(bricksTex);
 	Resources::RegularTextures[stoneTex->Name] = std::move(stoneTex);
@@ -810,7 +819,7 @@ void CameraAndDynamicIndexingApp::BuildDescriptorHeaps()
 	// Create the SRV heap.
 	//
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 4;
+	srvHeapDesc.NumDescriptors = 5;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&mSrvDescriptorHeap)));
@@ -824,6 +833,7 @@ void CameraAndDynamicIndexingApp::BuildDescriptorHeaps()
 	auto stoneTex = Resources::RegularTextures["stoneTex"]->Resource;
 	auto tileTex = Resources::RegularTextures["tileTex"]->Resource;
 	auto crateTex = Resources::RegularTextures["crateTex"]->Resource;
+    auto npcTex = Resources::RegularTextures["NpcTex"]->Resource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -854,6 +864,13 @@ void CameraAndDynamicIndexingApp::BuildDescriptorHeaps()
 	srvDesc.Format = crateTex->GetDesc().Format;
 	srvDesc.Texture2D.MipLevels = crateTex->GetDesc().MipLevels;
 	md3dDevice->CreateShaderResourceView(crateTex.Get(), &srvDesc, hDescriptor);
+
+    // next descriptor
+    hDescriptor.Offset(1, mCbvSrvDescriptorSize);
+    
+    srvDesc.Format = npcTex->GetDesc().Format;
+    srvDesc.Texture2D.MipLevels = npcTex->GetDesc().MipLevels;
+    md3dDevice->CreateShaderResourceView(npcTex.Get(), &srvDesc, hDescriptor);
 }
 
 void CameraAndDynamicIndexingApp::BuildShadersAndInputLayout()
@@ -1077,11 +1094,20 @@ void CameraAndDynamicIndexingApp::BuildMaterials()
 	crate0->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     crate0->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
     crate0->Roughness = 0.2f;
-	
+
+    auto npc0 = std::make_unique<Material>();
+    npc0->Name = "npc0";
+    npc0->MatCBIndex = 4;
+    npc0->DiffuseSrvHeapIndex = 4;
+    npc0->DiffuseAlbedo = XMFLOAT4 {1,1,1,1};
+    npc0->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f); 
+    npc0->Roughness = 0.2f;
+        
 	mMaterials["bricks0"] = std::move(bricks0);
 	mMaterials["stone0"] = std::move(stone0);
 	mMaterials["tile0"] = std::move(tile0);
 	mMaterials["crate0"] = std::move(crate0);
+    mMaterials["npc0"] = std::move(npc0);
 }
 
 void CameraAndDynamicIndexingApp::BuildPlane()
@@ -1103,26 +1129,26 @@ void CameraAndDynamicIndexingApp::BuildPlane()
 
 void CameraAndDynamicIndexingApp::BuildNPCs()
 {
-    const float SCALE = 1;
+    static const float SCALE = 0.008f;
     
-    // auto npc = std::make_unique<Actor>(
-    //        std::vector<std::shared_ptr<IComponent>> {
-    //            std::make_unique<ModelRenderer3D>("./Models/lu/lu.fbx",
-    //                mMaterials["stone0"].get()),
-    //            std::make_shared<Transform>(
-    //                XMFLOAT3 {0, 0, 0},
-    //                XMFLOAT3 {SCALE, SCALE, SCALE}),
-    //            std::make_shared<StoryTeller>(
-    //                mPlayer2.get(),
-    //                std::vector<ImageBase*> {
-    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(0).get()),
-    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(1).get()),
-    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(2).get()),
-    //                    dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(3).get())
-    //                })
-    //        }
-    //    );
-    // mSceneActors.push_back(std::move(npc));
+    auto npc = std::make_unique<Actor>(
+           std::vector<std::shared_ptr<IComponent>> {
+               std::make_unique<ModelRenderer3D>("./Models/character/character.fbx",
+                   mMaterials["npc0"].get()),
+               std::make_shared<Transform>(
+                   XMFLOAT3 {0, 1.5, 0},
+                   XMFLOAT3 {SCALE, SCALE, SCALE}),
+               // std::make_shared<StoryTeller>(
+               //     mPlayer2.get(),
+               //     std::vector<ImageBase*> {
+               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(0).get()),
+               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(1).get()),
+               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(2).get()),
+               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(3).get())
+               //     })
+           }
+       );
+    mSceneActors.push_back(std::move(npc));
 
     
     auto npc2 = std::make_unique<Actor>(
@@ -1142,12 +1168,12 @@ void CameraAndDynamicIndexingApp::BuildScene()
     auto sampleToy = std::make_unique<Actor>(
         std::vector<std::shared_ptr<IComponent>> {
             std::make_unique<Transform>(
-                XMFLOAT3 {0, 1, 0},
+                XMFLOAT3 {0, 3, 0},
                 XMFLOAT3 {1, 1, 1},
                 XMFLOAT3 {0, 0, 0}
                 ),
             std::make_unique<ImageRender3D>(
-                m3DCharactersBatch.get(), 5, 5,
+                m3DCharactersBatch.get(), 1, 1,
                 Resources::CnCharLoader.GetByIndex(0), &mCamera
                 ),
             std::make_unique<AlwaysFaceTarget>(mPlayer2.get())
