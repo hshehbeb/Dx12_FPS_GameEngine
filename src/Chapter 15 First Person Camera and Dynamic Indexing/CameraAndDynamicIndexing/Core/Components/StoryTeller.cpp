@@ -1,24 +1,34 @@
 ﻿#include "StoryTeller.h"
 
+#include "../../Scripter.h"
 #include "../Utilis//UtilisFunctionLibery.h"
 #include "../UIWidgets/ImageBase.h"
 
-StoryTeller::StoryTeller(Actor* talkTarget, std::vector<ImageBase*> imgConversation)
+
+namespace /* CONSTANTS */
+{
+    static const int NULL_DIALOG = -1;
+}
+
+StoryTeller::StoryTeller(Actor* talkTarget, int dialogId, float triggerDist)
     : mTalkTarget(talkTarget)
-    , mImgConversation(std::move(imgConversation))
+    , mDialog(dialogId)
+    , mTriggerDistance(triggerDist)
+    , mPrevTriggeredDlg(NULL_DIALOG)
 {
 }
 
 void StoryTeller::Update(ArgsForUpdate args)
 {
     auto* owner = args.Owner;
-    if (ActorUtilis::DistanceBetweenActors(owner, mTalkTarget) < TALK_DISTANCE)
+    bool closeEnough =
+        ActorUtilis::DistanceBetweenActors(owner, mTalkTarget) < mTriggerDistance;
+    bool notTriggered = (mPrevTriggeredDlg != mDialog);
+    
+    if (closeEnough && notTriggered)
     {
-        SetConversationActive(true);
-    }
-    else
-    {
-        SetConversationActive(false);
+        Resources::gScripter->ShowDialog(mDialog, {});
+        mPrevTriggeredDlg = mDialog;
     }
 }
 
@@ -26,10 +36,10 @@ void StoryTeller::Initialize(ArgsForInit args)
 {
 }
 
-void StoryTeller::SetConversationActive(bool isOn)
-{
-    for (auto& img : mImgConversation)
-    {
-        img->Visible = isOn;
-    }
-}
+// void StoryTeller::SetConversationActive(bool isOn)
+// {
+//     for (auto& img : mImgConversation)
+//     {
+//         img->Visible = isOn;
+//     }
+// }

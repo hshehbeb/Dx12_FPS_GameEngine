@@ -9,73 +9,17 @@
 #include "DataStructures/ChineseChar.h"
 
 
-bool Scripter::ReplyInfo::ShouldJump() const
+namespace /* CONSTANTS */
 {
-    return JumpToDialog >= 0;
+    static const int NULL_DIALOG = -1;
 }
 
-void Scripter::DialogInfo::ShowDialog()
+bool Scripter::ReplyInfo::CanJumpTo() const
 {
-    for (const auto & img : Text->Images)
-        img->Visible = true;
-
-    for (int i = 0; i < Replies.size(); i++)
-    {
-        const auto& aReply = Replies[i];
-        for (const auto & img : aReply ->Text->Images)
-        {
-            img->Visible = true;
-        }
-
-        auto& btn = Resources::gChoiceButtons[i];
-        btn->SetPosition(dynamic_cast<Image2D*>(
-            aReply->Text->Images.back().get())->GetPosition() + ScreenSpacePoint {50, 0}
-            );
-        btn->SetShouldDraw(true);
-        if ( aReply->ShouldJump() )
-            btn->SetOnClickHandle([&aReply, this](ScreenSpacePoint){
-                this->HideDialog();
-                Resources::gScripter->ShowDialog(aReply->JumpToDialog, {});
-            });
-    }
+    return DialogIdJumpTo >= 0;
 }
 
-void Scripter::DialogInfo::HideDialog()
-{
-    for (const auto& img : Text->Images)
-        img->Visible = false;
-
-    for (int i = 0; i < Replies.size(); i++)
-    {
-        const auto& aReply = Replies[i];
-        for (const auto & img : aReply ->Text->Images)
-            img->Visible = false;
-
-        Resources::gChoiceButtons[i]->SetShouldDraw(false);
-    }
-}
-
-// struct Scripter::ParseResult
-// {
-// private:
-//     typedef std::unordered_map<int, std::vector<ChineseChar>> t_DlgIdToCnChars;
-//     typedef std::unordered_map<int, std::vector<int>> t_DlgIdToReplies;
-//     typedef std::unordered_map<int, Json::Value> t_DlgToFormatConf;
-//
-// public:
-//     /**
-//      * dialog's id to its present characters map
-//      */
-//     // t_DlgIdToCnChars ChineseCharacters;
-//
-//     std::vector<std::unique_ptr<DialogInfo>> AllDialogs;
-//     std::unordered_map<int, DialogInfo*> DialogLookup; 
-//
-//     // t_DlgIdToReplies RepliesLookup;
-//     t_DlgToFormatConf FormatLookup;
-// };
-
-void Scripter::ParseFromJson(const char* filePath, ID3D12Device* device,
+void Scripter::ParseJsonAndCreateAllDialogs(const char* filePath, ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch)
 {
     Json::Value jsonObj;
@@ -90,19 +34,16 @@ void Scripter::ParseFromJson(const char* filePath, ID3D12Device* device,
     }
 }
 
-Scripter::Scripter(const char* filePath)
-    : mJsonPath(filePath)
+Scripter::Scripter(const char* jsonPath)
+    : mJsonPath(jsonPath)
 {
 }
 
-void Scripter::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch)
+void Scripter::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
+    AnythingBatch* batchOfText, AnythingBatch* batchOfDlgBG)
 {
-    // if (!mParseResult)
-        // throw std::exception("Parse() should be called before Initialize()");
-
-    ParseFromJson(mJsonPath, device, cmdList, imgBatch);
-    
-    // LoadAllDialogs(device, cmdList, imgBatch);
+    ParseJsonAndCreateAllDialogs(mJsonPath, device, cmdList, batchOfText);
+    CreateDialogBG(batchOfDlgBG);
 }
 
 void Scripter::RegisterDialogHandle(int dlgIdx, t_DialogHandleFunc handleFunc)
@@ -110,59 +51,24 @@ void Scripter::RegisterDialogHandle(int dlgIdx, t_DialogHandleFunc handleFunc)
     HandleLookup.insert_or_assign(dlgIdx, handleFunc);
 }
 
-// void Scripter::LoadDialog(int dlgIdx, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
-//     const std::vector<ChineseChar>& characters, AnythingBatch* imgBatch)
-// {
-//     auto text = std::make_unique<TextCN>();
-//     
-//     for (int i = 0; i < characters.size(); i++)
-//     {
-//         auto aChar = characters[i];
-//         
-//         int idx = Resources::CnCharLoader.LoadCharacter(aChar, device, cmdList);
-//         Texture* tex = Resources::CnCharLoader.GetByIndex(idx);
-//
-//         auto x = mParseResult->FormatLookup[dlgIdx].get("x", 0);
-//         auto y = mParseResult->FormatLookup[dlgIdx].get("y", 0);
-//         auto size = mParseResult->FormatLookup[dlgIdx].get("size", 50);
-//         auto img = std::make_shared<Image2D>(
-//             ScreenSpacePoint {x.asInt() + i * size.asInt(), y.asInt()},
-//             size.asInt(), size.asInt(), tex
-//             );
-//         img->Visible = false;
-//         
-//         text->Images.push_back(img);
-//         imgBatch->Add(img);
-//     }
-//     
-//     mDlgIdToText.insert_or_assign(dlgIdx, std::move(text));
-// }
-
 void Scripter::ShowDialog(int dlgIdx, const t_DialogHandleFuncParams& params)
 {
-    bool anyHandleFound = (HandleLookup.find(dlgIdx) != HandleLookup.end());
+    bool anySpecialHandle = (HandleLookup.find(dlgIdx) != HandleLookup.end());
+    anySpecialHandle ? HandleLookup[dlgIdx](params)
+                     : DialogHandleFuncLibrary::ShowAsClassicDialog2D(dlgIdx);
 
-    anyHandleFound
-        ? HandleLookup[dlgIdx](params)
-        : DialogHandleFuncLibrary::ShowAsClassicDialog2D(dlgIdx); 
+    mDlgOnPresent = dlgIdx;
 }
 
-// TextCN* Scripter::GetTextOfDialog(int dlgIdx)
-// {
-//     bool found = (mDlgIdToText.find(dlgIdx) != mDlgIdToText.end());
-//     if (!found)
-//         throw std::exception("Parse() & Initialize() should be called first");
-//     
-//     return mDlgIdToText[dlgIdx].get();
-// }
-
-// std::vector<int>& Scripter::GetReplyIndices(int dlgIdx) const
-// {
-//     return mParseResult->RepliesLookup[dlgIdx];
-// }
+void Scripter::HideCurrentDialog()
+{
+    DialogHandleFuncLibrary::HideDialog(mDlgOnPresent);
+    
+    mDlgOnPresent = NULL_DIALOG;
+}
 
 void Scripter::ParseJsonObject(const Json::Value& jsonObj,
-    ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* batch)
+                               ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, AnythingBatch* batch)
 {
     const Json::Value& dialogs = jsonObj["dialogs"];
     for (const auto& dialog : dialogs)
@@ -184,7 +90,7 @@ void Scripter::ParseDialog(const Json::Value& dlgJson, ID3D12Device* device,
     {
         auto replyInfo = std::make_unique<ReplyInfo>();
         replyInfo->Text = std::move( CreateTextObject(replyJson, device, cmdList, batch) );
-        replyInfo->JumpToDialog = replyJson.get("jump_to", -1).asInt();
+        replyInfo->DialogIdJumpTo = replyJson.get("jump_to", -1).asInt();
 
         dlgInfo->Replies.push_back(std::move(replyInfo));
     }
@@ -220,14 +126,13 @@ std::unique_ptr<TextCN> Scripter::CreateTextObject(const Json::Value& dlgJson,
     return std::move(text);
 }
 
-// void Scripter::LoadAllDialogs(ID3D12Device* device,
-//     ID3D12GraphicsCommandList* cmdList, AnythingBatch* imgBatch)
-// {
-//     for (const auto& pair : mParseResult->ChineseCharacters)
-//     {
-//         int dlgId = pair.first;
-//         const std::vector<ChineseChar>& chars = pair.second;
-//
-//         LoadDialog(dlgId, device, cmdList, chars, imgBatch);
-//     }
-// }
+void Scripter::CreateDialogBG(AnythingBatch* batchOfDlgBG)
+{
+    DialogBG = std::make_shared<Image2D>(
+        ScreenSpacePoint {400, 280}, 600, 360,
+        Resources::RegularTextures["DialogBG"].get()
+    );
+    DialogBG->Visible = false;
+    
+    batchOfDlgBG->Add(DialogBG);
+}

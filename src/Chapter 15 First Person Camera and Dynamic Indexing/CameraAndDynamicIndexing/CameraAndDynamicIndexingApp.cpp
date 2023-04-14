@@ -297,11 +297,12 @@ void CameraAndDynamicIndexingApp::RegisterDialogHandle()
 {
     Resources::gScripter = std::make_shared<Scripter>("Script.json");
     Resources::gScripter->Initialize(
-        md3dDevice.Get(), mCommandList.Get(), m2DCharactersBatch.get()
-        );
+        md3dDevice.Get(), mCommandList.Get(),
+        m2DCharactersBatch.get(), mImageBatch.get()
+    );
     
-    Resources::gScripter->RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
-    Resources::gScripter->RegisterDialogHandle(3, &DialogHandleFuncLibrary::HandleDialog3);
+    // Resources::gScripter->RegisterDialogHandle(0, &DialogHandleFuncLibrary::HandleDialog1);
+    // Resources::gScripter->RegisterDialogHandle(3, &DialogHandleFuncLibrary::HandleDialog3);
 }
 
 void CameraAndDynamicIndexingApp::LoadMenuUiElements()
@@ -328,10 +329,6 @@ void CameraAndDynamicIndexingApp::LoadMenuUiElements()
     //     mImageBatch->Add(btn->image);
     // }
 
-    // mImageBatch->Add(std::make_shared<Image2D>(
-    //     ScreenSpacePoint {400, 280}, 600, 360,
-    //     Resources::RegularTextures["DialogBG"].get()
-    //     ));
     
     /* prepare reusable option buttons for dialog */
     static const int MAX_BUTTONS = 3;
@@ -1133,19 +1130,12 @@ void CameraAndDynamicIndexingApp::BuildNPCs()
     
     auto npc = std::make_unique<Actor>(
            std::vector<std::shared_ptr<IComponent>> {
-               std::make_unique<ModelRenderer3D>("./Models/character/character.fbx",
+               std::make_shared<ModelRenderer3D>("./Models/character/character.fbx",
                    mMaterials["npc0"].get()),
                std::make_shared<Transform>(
                    XMFLOAT3 {0, 1.5, 0},
                    XMFLOAT3 {SCALE, SCALE, SCALE}),
-               // std::make_shared<StoryTeller>(
-               //     mPlayer2.get(),
-               //     std::vector<ImageBase*> {
-               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(0).get()),
-               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(1).get()),
-               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(2).get()),
-               //         dynamic_cast<ImageBase*>(mImagesRegistry.GetValues().at(3).get())
-               //     })
+               std::make_shared<StoryTeller>(mPlayer2.get(), 0)
            }
        );
     mSceneActors.push_back(std::move(npc));

@@ -5,18 +5,17 @@
 class StoryTeller : public IComponent
 {
 public:
-    StoryTeller(Actor* talkTarget, std::vector<ImageBase*> imgConversation);
+    StoryTeller(Actor* talkTarget, int dialogId, float triggerDist = 10);
 
     void Update(ArgsForUpdate args) override;
     void Initialize(ArgsForInit args) override;
 
 private:
-#define TALK_DISTANCE 20.0f
-
-private:
     Actor* mTalkTarget;
-    std::vector<ImageBase*> mImgConversation;
+    int mDialog;
+    float mTriggerDistance;
+    int mPrevTriggeredDlg;
 
-private:
-    void SetConversationActive(bool isOn);
+// private:
+//     void SetConversationActive(bool isOn);
 };
