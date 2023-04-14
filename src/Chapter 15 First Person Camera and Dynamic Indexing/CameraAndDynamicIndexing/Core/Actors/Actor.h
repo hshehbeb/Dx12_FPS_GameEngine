@@ -1,10 +1,9 @@
 ﻿#pragma once
-#include <DirectXCollision.h>
 #include <memory>
-#include <unordered_map>
 #include <vector>
-
 #include "../Components/IComponent.h"
+#include "../../../../Common/GameTimer.h"
+
 
 // Actor gives you ability to attach components 
 class Actor
@@ -17,7 +16,7 @@ public:
 
     void Initialize(ID3D12Device* device,
         ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList);
-    void Update();
+    void Update(const GameTimer& gt);
     
     template <class T>
     bool TryGetComponent(T** result);

@@ -609,11 +609,13 @@
     <ClInclude Include="DataStructures\ChineseChar.h" />
     <ClInclude Include="DataStructures\EfficientLookup.h" />
     <ClInclude Include="DataStructures\IDialogHandleFuncParam.h" />
+    <ClInclude Include="DataStructures\ArgsForInit.h" />
     <ClInclude Include="DataStructures\RenderItem.h" />
     <ClInclude Include="DataStructures\RenderItemsList.h" />
     <ClInclude Include="DataStructures\Rotation.h" />
     <ClInclude Include="DataStructures\ScreenSpacePoint.h" />
     <ClInclude Include="DataStructures\TextCN.h" />
+    <ClInclude Include="DataStructures\ArgsForUpdate.h" />
     <ClInclude Include="DataStructures\Vertex.h" />
     <ClInclude Include="DataStructures\WorldSpacePoint.h" />
     <ClInclude Include="DialogHandleFuncLibrary.h" />

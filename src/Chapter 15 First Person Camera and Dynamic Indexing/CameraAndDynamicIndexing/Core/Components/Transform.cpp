@@ -7,12 +7,11 @@ Transform::Transform(XMFLOAT3 pos, XMFLOAT3 scale, XMFLOAT3 rot)
     SetScale(scale);
 }
 
-void Transform::Initialize(ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
+void Transform::Initialize(ArgsForInit)
 {
 }
 
-void Transform::Update(Actor* owner)
+void Transform::Update(ArgsForUpdate)
 {
 }
 

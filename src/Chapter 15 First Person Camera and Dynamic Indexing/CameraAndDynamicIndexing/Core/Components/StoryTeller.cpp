@@ -9,8 +9,9 @@ StoryTeller::StoryTeller(Actor* talkTarget, std::vector<ImageBase*> imgConversat
 {
 }
 
-void StoryTeller::Update(Actor* owner)
+void StoryTeller::Update(ArgsForUpdate args)
 {
+    auto* owner = args.Owner;
     if (ActorUtilis::DistanceBetweenActors(owner, mTalkTarget) < TALK_DISTANCE)
     {
         SetConversationActive(true);
@@ -21,8 +22,7 @@ void StoryTeller::Update(Actor* owner)
     }
 }
 
-void StoryTeller::Initialize(ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
+void StoryTeller::Initialize(ArgsForInit args)
 {
 }
 

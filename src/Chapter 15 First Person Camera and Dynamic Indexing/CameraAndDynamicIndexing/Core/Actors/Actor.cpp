@@ -8,15 +8,15 @@ Actor::Actor(std::vector<std::shared_ptr<IComponent>>&& components)
 void Actor::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList)
 {
     for (auto& comp : mComponents)
-    {
-        comp->Initialize(device, cmdList, rItemsList, this);
-    }
+        comp->Initialize(
+            ArgsForInit {device, cmdList, rItemsList, this}
+        );
 }
 
-void Actor::Update()
+void Actor::Update(const GameTimer& gt)
 {
     for (auto& comp : mComponents)
-    {
-        comp->Update(this);
-    }
+        comp->Update(
+            ArgsForUpdate {gt.DeltaTime(), this}
+        );
 }

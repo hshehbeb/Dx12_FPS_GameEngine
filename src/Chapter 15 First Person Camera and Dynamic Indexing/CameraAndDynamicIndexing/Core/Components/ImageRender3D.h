@@ -17,10 +17,8 @@ public:
     ImageRender3D(AnythingBatch* batch, float width, float height,
         Texture* tex, Camera* cam);
     
-    void Update(Actor* owner) override;
-    
-    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
-        RenderItemsList& rItemsList, Actor* owner) override;
+    void Initialize(ArgsForInit args) override;
+    void Update(ArgsForUpdate args) override;
 
 private:
     float mWidth, mHeight;

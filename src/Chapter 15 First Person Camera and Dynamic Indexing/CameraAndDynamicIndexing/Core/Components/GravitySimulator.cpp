@@ -12,8 +12,10 @@ GravitySimulator::GravitySimulator(DirectX::XMFLOAT3 gravityDirection, float max
 {
 }
 
-void GravitySimulator::Update(Actor* owner)
+void GravitySimulator::Update(ArgsForUpdate args)
 {
+    Actor* owner = args.Owner;
+    
     if (mIgnoreThisFrame)
     {
         mIgnoreThisFrame = false;
@@ -58,8 +60,7 @@ void GravitySimulator::Update(Actor* owner)
     comp->MoveFree(translation);
 }
 
-void GravitySimulator::Initialize(ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
+void GravitySimulator::Initialize(ArgsForInit args)
 {
 }
 

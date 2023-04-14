@@ -1,5 +1,10 @@
 ﻿#pragma once
+
 #include "IComponent.h"
+#include "../../../Common/MathHelper.h"
+
+
+using namespace DirectX;
 
 class Transform : public IComponent
 {
@@ -11,10 +16,8 @@ public:
         XMFLOAT3 rot = {MathHelper::Pi / 2, 0, 0}
     );
 
-    void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
-        RenderItemsList& rItemsList, Actor* owner) override;
-    
-    void Update(Actor* owner) override;
+    void Initialize(ArgsForInit args) override;
+    void Update(ArgsForUpdate args) override;
 
     void SetPosition(XMFLOAT3 newPos);
     void SetRotation(XMFLOAT3 newEulerAngle);

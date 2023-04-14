@@ -9,12 +9,14 @@ ImageRender3D::ImageRender3D(AnythingBatch* batch, float width, float height, Te
 {
 }
 
-void ImageRender3D::Update(Actor* owner)
+void ImageRender3D::Update(ArgsForUpdate args)
 {
 }
 
-void ImageRender3D::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
+void ImageRender3D::Initialize(ArgsForInit args)
 {
+    Actor* owner = args.Owner;
+    
     Transform* trans;
     if (!owner->TryGetComponent(&trans))
     {

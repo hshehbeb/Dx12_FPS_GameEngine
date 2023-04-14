@@ -4,18 +4,23 @@
 #include "../Actors/Actor.h"
 #include "../Utilis/UtilisFunctionLibery.h"
 
+namespace
+{
+    using namespace DirectX;
+}
+
 AlwaysFaceTarget::AlwaysFaceTarget(Actor* target)
     : mTarget(target)
 {
 }
 
-void AlwaysFaceTarget::Initialize(ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
+void AlwaysFaceTarget::Initialize(ArgsForInit)
 {
 }
 
-void AlwaysFaceTarget::Update(Actor* owner)
+void AlwaysFaceTarget::Update(ArgsForUpdate args)
 {
+    Actor* owner = args.Owner;
     Transform* ownerTrans;
     if (!owner->TryGetComponent(&ownerTrans))
         ActorUtilis::ThrowRequireCompException(typeid(Transform).name());

@@ -420,11 +420,11 @@ void CameraAndDynamicIndexingApp::OnResize()
 
 void CameraAndDynamicIndexingApp::Update(const GameTimer& gt)
 {
-    mPlayer2->Update();
+    mPlayer2->Update(gt);
     
     for (auto& sceneActor : mSceneActors)
     {
-        sceneActor->Update();
+        sceneActor->Update(gt);
     }
     
     OnKeyboardInput(gt);

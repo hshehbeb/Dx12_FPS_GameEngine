@@ -1,7 +1,8 @@
 ﻿#include "ModelRenderer3D.h"
-
 #include "Transform.h"
 #include "../Actors/Actor.h"
+#include "../../DataStructures/RenderItemsList.h"
+
 
 ModelRenderer3D::ModelRenderer3D(std::string loadPath, Material* material)
     : mPath(loadPath)
@@ -10,9 +11,12 @@ ModelRenderer3D::ModelRenderer3D(std::string loadPath, Material* material)
 {
 }
 
-void ModelRenderer3D::Initialize(ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
+void ModelRenderer3D::Initialize(ArgsForInit args)
 {
+    auto* device = args.Device;
+    auto* cmdList = args.CmdList;
+    auto& rItemsList = args.RenderItems;
+    
     LoadModel(device, cmdList);
 
     for (auto& renderItem : BuildRenderItems())
@@ -33,8 +37,9 @@ void ModelRenderer3D::LoadModel(ID3D12Device* device, ID3D12GraphicsCommandList*
     LoadFromMemoryToGPU(device, cmdList);
 }
 
-void ModelRenderer3D::Update(Actor* owner)
+void ModelRenderer3D::Update(ArgsForUpdate args)
 {
+    Actor* owner = args.Owner;
     Transform* transform;
     if (owner->TryGetComponent(&transform))
     {

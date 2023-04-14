@@ -12,8 +12,9 @@ PlayerMovement::PlayerMovement(Camera& camera, float&& moveSpeed, float&& jumpSp
 {
 }
 
-void PlayerMovement::Update(Actor* owner)
+void PlayerMovement::Update(ArgsForUpdate args)
 {
+    Actor* owner = args.Owner;
     DirectX::XMFLOAT3 translation {};
     
     /* x, z axis */
@@ -50,9 +51,9 @@ void PlayerMovement::Update(Actor* owner)
     mMoveDirectionThisFrame = {};
 }
 
-void PlayerMovement::Initialize(ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList, RenderItemsList& rItemsList, Actor* owner)
+void PlayerMovement::Initialize(ArgsForInit args)
 {
+    auto* owner = args.Owner;
     Transform* trans;
     if (owner->TryGetComponent(&trans))
     {
