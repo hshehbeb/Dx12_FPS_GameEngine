@@ -11,7 +11,7 @@ public:
     float JumpSpeed;
     
 public:
-    PlayerMovement(Camera& camera, float&& moveSpeed = 0.005f, float&& jumpSpeed = 0.005f);
+    PlayerMovement(Camera& camera, float moveSpeed = 6, float jumpSpeed = 4);
     
     virtual void Initialize(ArgsForInit args) override;
     virtual void Update(ArgsForUpdate args) override;

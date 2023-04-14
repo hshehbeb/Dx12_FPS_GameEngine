@@ -4,7 +4,7 @@
 #include "Transform.h"
 #include "../Actors/Actor.h"
 
-PlayerMovement::PlayerMovement(Camera& camera, float&& moveSpeed, float&& jumpSpeed)
+PlayerMovement::PlayerMovement(Camera& camera, float moveSpeed, float jumpSpeed)
     : MoveSpeed(moveSpeed)
     , JumpSpeed(jumpSpeed)
     , mMoveDirectionThisFrame(DirectX::XMFLOAT3 {0,0,0})
@@ -20,13 +20,13 @@ void PlayerMovement::Update(ArgsForUpdate args)
     /* x, z axis */
     float magnitude = sqrtf(mMoveDirectionThisFrame.x * mMoveDirectionThisFrame.x + mMoveDirectionThisFrame.z * mMoveDirectionThisFrame.z);
     translation.x = (magnitude == 0) ?
-        0 : mMoveDirectionThisFrame.x / magnitude * MoveSpeed;
+        0 : mMoveDirectionThisFrame.x / magnitude * MoveSpeed * args.DeltaTime;
     translation.z = (magnitude == 0) ?
-        0 : mMoveDirectionThisFrame.z / magnitude * MoveSpeed;
+        0 : mMoveDirectionThisFrame.z / magnitude * MoveSpeed * args.DeltaTime;
     
     /* y axis */
     translation.y = (mMoveDirectionThisFrame.y == 0) ?
-        0 : mMoveDirectionThisFrame.y * JumpSpeed;
+        0 : mMoveDirectionThisFrame.y * JumpSpeed * args.DeltaTime;
 
     if (translation.x == 0 && translation.y == 0 && translation.z == 0)
         return;
